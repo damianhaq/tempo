@@ -1,1589 +1,1767 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0e1014">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>TEMPO — Licznik wydajności</title>
-  <style>
-    /* Zmienne kolorystyczne i podstawowy reset */
-    :root {
-      --bg: #0e1014;
-      --card: #161920;
-      --card-elevated: #1c202a;
-      --border: #262b36;
-      --border-strong: #343b4a;
-      --text: #f1f5f9;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --green: #22c55e;
-      --green-bg: rgba(34, 197, 94, 0.12);
-      --green-border: rgba(34, 197, 94, 0.35);
-      --red: #ef4444;
-      --red-bg: rgba(239, 68, 68, 0.12);
-      --red-border: rgba(239, 68, 68, 0.35);
-      --blue: #3b82f6;
-      --blue-bg: rgba(59, 130, 246, 0.14);
-      --blue-border: rgba(59, 130, 246, 0.4);
-      --radius: 14px;
-      --radius-sm: 10px;
-    }
-
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html, body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      font-size: 15px;
-      line-height: 1.4;
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Stała szerokość cyfr dla wszystkich liczników i tabel */
-    .tabular {
-      font-variant-numeric: tabular-nums;
-      font-feature-settings: "tnum" 1;
-    }
-
-    .app {
-      width: 100%;
-      max-width: 540px;
-      margin: 0 auto;
-      padding: 12px 14px 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    /* Górny pasek nawigacji */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 4px 2px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-title {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      color: var(--text);
-    }
-
-    .status-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--text-dim);
-      transition: background 0.2s, box-shadow 0.2s;
-    }
-
-    .status-dot.running {
-      background: var(--green);
-      box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
-    }
-
-    .status-dot.paused {
-      background: #f59e0b;
-      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
-    }
-
-    .goal-toggle-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 12px;
-      border-radius: var(--radius-sm);
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .goal-toggle-btn:hover,
-    .goal-toggle-btn.active {
-      border-color: var(--blue);
-      background: var(--card-elevated);
-    }
-
-    .goal-pill-label {
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    /* Panel ustawień progu docelowego */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px;
-    }
-
-    .goal-panel {
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      border-color: var(--blue-border);
-    }
-
-    .goal-panel.open {
-      display: flex;
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .panel-title {
-      font-size: 0.78rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-    }
-
-    .goal-grid {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      gap: 10px;
-      align-items: end;
-    }
-
-    .goal-divider {
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      padding-bottom: 10px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .field-label {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .time-inputs {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .input-box {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border-strong);
-      border-radius: 9px;
-      color: var(--text);
-      font-size: 1rem;
-      font-weight: 600;
-      padding: 9px 10px;
-      text-align: center;
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .input-box:focus {
-      border-color: var(--blue);
-    }
-
-    .time-sep {
-      color: var(--text-muted);
-      font-weight: 700;
-    }
-
-    .setting-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-
-    .setting-desc {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
-
-    /* Przełącznik (toggle switch) */
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 44px;
-      height: 24px;
-      flex-shrink: 0;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      inset: 0;
-      background: var(--border-strong);
-      border-radius: 24px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .slider::before {
-      content: "";
-      position: absolute;
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      top: 3px;
-      background: var(--text);
-      border-radius: 50%;
-      transition: transform 0.2s;
-    }
-
-    .switch input:checked + .slider {
-      background: var(--blue);
-    }
-
-    .switch input:checked + .slider::before {
-      transform: translateX(20px);
-    }
-
-    /* Blok bilansu na żywo (+/- względem progu) */
-    .balance-card {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: border-color 0.2s, background 0.2s;
-    }
-
-    .balance-card.ahead {
-      border-color: var(--green-border);
-      background: linear-gradient(180deg, rgba(34, 197, 94, 0.08) 0%, var(--card) 100%);
-    }
-
-    .balance-card.behind {
-      border-color: var(--red-border);
-      background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, var(--card) 100%);
-    }
-
-    .balance-top {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .balance-label-group {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .balance-tag {
-      font-size: 0.74rem;
-      font-weight: 700;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .balance-card.ahead .balance-tag {
-      color: var(--green);
-    }
-
-    .balance-card.behind .balance-tag {
-      color: var(--red);
-    }
-
-    .balance-sub {
-      font-size: 0.78rem;
-      color: var(--text-dim);
-    }
-
-    .balance-value {
-      font-size: 2.35rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1;
-      color: var(--text);
-    }
-
-    .balance-card.ahead .balance-value {
-      color: var(--green);
-    }
-
-    .balance-card.behind .balance-value {
-      color: var(--red);
-    }
-
-    /* Wskaźnik bieżącego okrążenia z paskiem postępu */
-    .current-lap-bar-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-
-    .current-lap-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .current-lap-delta {
-      font-weight: 700;
-    }
-
-    .current-lap-delta.ok {
-      color: var(--green);
-    }
-
-    .current-lap-delta.over {
-      color: var(--red);
-    }
-
-    .progress-track {
-      width: 100%;
-      height: 8px;
-      background: var(--bg);
-      border-radius: 999px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--green);
-      border-radius: 999px;
-      transition: background 0.2s;
-    }
-
-    .progress-fill.over {
-      background: var(--red);
-    }
-
-    /* Ogromny przycisk główny (mobile-first pod kciuk) */
-    .main-btn {
-      position: relative;
-      width: 100%;
-      min-height: 128px;
-      border-radius: 18px;
-      border: 2px solid var(--blue);
-      background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
-      color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      touch-action: manipulation;
-      overflow: hidden;
-      padding: 14px 16px;
-      transition: transform 0.08s ease, background 0.2s, border-color 0.2s, opacity 0.2s;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-    }
-
-    .main-btn:active:not(:disabled) {
-      transform: scale(0.985);
-    }
-
-    .main-btn.running {
-      border-color: var(--green);
-      background: linear-gradient(180deg, #15803d 0%, #166534 100%);
-    }
-
-    .main-btn.running.over-target {
-      border-color: var(--red);
-      background: linear-gradient(180deg, #b91c1c 0%, #991b1b 100%);
-    }
-
-    .main-btn.paused {
-      border-color: #d97706;
-      background: linear-gradient(180deg, #92400e 0%, #78350f 100%);
-    }
-
-    .main-btn.locked {
-      opacity: 0.72;
-      cursor: wait;
-    }
-
-    .main-btn-top {
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      opacity: 0.9;
-    }
-
-    .main-btn-timer {
-      font-size: 2.55rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.05;
-    }
-
-    .main-btn-action {
-      font-size: 0.92rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      opacity: 0.95;
-      margin-top: 2px;
-    }
-
-    .cooldown-bar {
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      height: 4px;
-      width: 0%;
-      background: rgba(255, 255, 255, 0.85);
-    }
-
-    /* Rząd przycisków sterujących pod głównym przyciskiem */
-    .controls-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .ctrl-btn {
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px 8px;
-      border-radius: var(--radius-sm);
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      touch-action: manipulation;
-      text-align: center;
-      transition: background 0.15s, border-color 0.15s, opacity 0.15s;
-    }
-
-    .ctrl-btn:hover:not(:disabled) {
-      background: var(--card-elevated);
-      border-color: var(--border-strong);
-    }
-
-    .ctrl-btn:active:not(:disabled) {
-      transform: scale(0.98);
-    }
-
-    .ctrl-btn:disabled {
-      opacity: 0.38;
-      cursor: not-allowed;
-    }
-
-    .ctrl-btn.danger-outline:not(:disabled):hover {
-      border-color: var(--red-border);
-      color: #fca5a5;
-    }
-
-    /* Siatka statystyk na żywo */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-
-    @media (min-width: 480px) {
-      .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
+  <head>
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#0b0e14" />
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#0e1014" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <title>TEMPO — Licznik wydajności</title>
+    <style>
+      /* Zmienne kolorystyczne i podstawowy reset */
+      :root {
+        --bg: #0e1014;
+        --card: #161920;
+        --card-elevated: #1c202a;
+        --border: #262b36;
+        --border-strong: #343b4a;
+        --text: #f1f5f9;
+        --text-muted: #94a3b8;
+        --text-dim: #64748b;
+        --green: #22c55e;
+        --green-bg: rgba(34, 197, 94, 0.12);
+        --green-border: rgba(34, 197, 94, 0.35);
+        --red: #ef4444;
+        --red-bg: rgba(239, 68, 68, 0.12);
+        --red-border: rgba(239, 68, 68, 0.35);
+        --blue: #3b82f6;
+        --blue-bg: rgba(59, 130, 246, 0.14);
+        --blue-border: rgba(59, 130, 246, 0.4);
+        --radius: 14px;
+        --radius-sm: 10px;
       }
-    }
 
-    .stat-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 11px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    .stat-label {
-      font-size: 0.72rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text-muted);
-    }
+      html,
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        font-size: 15px;
+        line-height: 1.4;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
 
-    .stat-value {
-      font-size: 1.18rem;
-      font-weight: 700;
-      color: var(--text);
-    }
+      /* Stała szerokość cyfr dla wszystkich liczników i tabel */
+      .tabular {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum" 1;
+      }
 
-    .stat-value.good {
-      color: var(--green);
-    }
+      .app {
+        width: 100%;
+        max-width: 540px;
+        margin: 0 auto;
+        padding: 12px 14px 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
 
-    .stat-value.bad {
-      color: var(--red);
-    }
+      /* Górny pasek nawigacji */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 4px 2px;
+      }
 
-    /* Karta wykresu SVG */
-    .chart-card {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
 
-    .chart-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      min-height: 20px;
-    }
+      .brand-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: var(--text);
+      }
 
-    .chart-hover-info {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
+      .status-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--text-dim);
+        transition:
+          background 0.2s,
+          box-shadow 0.2s;
+      }
 
-    .chart-box {
-      width: 100%;
-      height: 155px;
-      position: relative;
-    }
+      .status-dot.running {
+        background: var(--green);
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
+      }
 
-    .chart-box svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-      overflow: visible;
-    }
+      .status-dot.paused {
+        background: #f59e0b;
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+      }
 
-    .chart-empty {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-dim);
-      font-size: 0.84rem;
-      border: 1px dashed var(--border);
-      border-radius: var(--radius-sm);
-    }
+      .goal-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
 
-    /* Lista pomiarów i eksport */
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
+      .goal-toggle-btn:hover,
+      .goal-toggle-btn.active {
+        border-color: var(--blue);
+        background: var(--card-elevated);
+      }
 
-    .export-actions {
-      display: flex;
-      gap: 6px;
-    }
+      .goal-pill-label {
+        color: var(--text-muted);
+        font-weight: 500;
+      }
 
-    .mini-btn {
-      background: var(--bg);
-      border: 1px solid var(--border-strong);
-      color: var(--text);
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: border-color 0.15s, background 0.15s;
-    }
+      /* Panel ustawień progu docelowego */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 14px;
+      }
 
-    .mini-btn:hover:not(:disabled) {
-      border-color: var(--blue);
-      background: var(--card-elevated);
-    }
+      .goal-panel {
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        border-color: var(--blue-border);
+      }
 
-    .mini-btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
+      .goal-panel.open {
+        display: flex;
+      }
 
-    .lap-table-head {
-      display: grid;
-      grid-template-columns: 36px 1fr 1fr 68px 30px;
-      gap: 6px;
-      padding: 0 4px 8px;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-dim);
-    }
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
 
-    .lap-table-head span:nth-child(4) {
-      text-align: right;
-    }
+      .panel-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
 
-    .lap-list {
-      max-height: 310px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
+      .goal-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 10px;
+        align-items: end;
+      }
 
-    .lap-row {
-      display: grid;
-      grid-template-columns: 36px 1fr 1fr 68px 30px;
-      gap: 6px;
-      align-items: center;
-      padding: 9px 4px;
-      border-bottom: 1px solid rgba(38, 43, 54, 0.55);
-      font-size: 0.86rem;
-    }
+      .goal-divider {
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        padding-bottom: 10px;
+        text-align: center;
+        font-weight: 600;
+      }
 
-    .lap-row:last-child {
-      border-bottom: none;
-    }
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
 
-    .lap-num {
-      color: var(--text-muted);
-      font-weight: 700;
-    }
+      .field-label {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+      }
 
-    .lap-time {
-      font-weight: 700;
-      color: var(--text);
-    }
+      .time-inputs {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 5px;
+      }
 
-    .lap-cum {
-      color: var(--text-muted);
-      font-size: 0.82rem;
-    }
+      .input-box {
+        width: 100%;
+        background: var(--bg);
+        border: 1px solid var(--border-strong);
+        border-radius: 9px;
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 600;
+        padding: 9px 10px;
+        text-align: center;
+        outline: none;
+        transition: border-color 0.15s;
+      }
 
-    .lap-diff {
-      text-align: right;
-      font-weight: 700;
-      font-size: 0.82rem;
-    }
+      .input-box:focus {
+        border-color: var(--blue);
+      }
 
-    .lap-diff.plus {
-      color: var(--green);
-    }
+      .time-sep {
+        color: var(--text-muted);
+        font-weight: 700;
+      }
 
-    .lap-diff.minus {
-      color: var(--red);
-    }
+      .setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+      }
 
-    .row-del-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 7px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-      transition: color 0.15s, background 0.15s, border-color 0.15s;
-    }
+      .setting-desc {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+      }
 
-    .row-del-btn:hover {
-      color: var(--red);
-      background: var(--red-bg);
-      border-color: var(--red-border);
-    }
+      /* Przełącznik (toggle switch) */
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+      }
 
-    .empty-msg {
-      padding: 20px 8px;
-      text-align: center;
-      color: var(--text-dim);
-      font-size: 0.84rem;
-    }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
 
-    /* Zwijana sekcja historii sesji */
-    .history-toggle {
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      cursor: pointer;
-      padding: 2px 0;
-      touch-action: manipulation;
-    }
+      .slider {
+        position: absolute;
+        inset: 0;
+        background: var(--border-strong);
+        border-radius: 24px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
 
-    .history-toggle-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+      .slider::before {
+        content: "";
+        position: absolute;
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        top: 3px;
+        background: var(--text);
+        border-radius: 50%;
+        transition: transform 0.2s;
+      }
 
-    .badge {
-      background: var(--card-elevated);
-      border: 1px solid var(--border-strong);
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
+      .switch input:checked + .slider {
+        background: var(--blue);
+      }
 
-    .chevron {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      font-weight: 700;
-      transition: transform 0.2s;
-    }
+      .switch input:checked + .slider::before {
+        transform: translateX(20px);
+      }
 
-    .chevron.open {
-      transform: rotate(180deg);
-    }
+      /* Blok bilansu na żywo (+/- względem progu) */
+      .balance-card {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+      }
 
-    .history-body {
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-    }
+      .balance-card.ahead {
+        border-color: var(--green-border);
+        background: linear-gradient(
+          180deg,
+          rgba(34, 197, 94, 0.08) 0%,
+          var(--card) 100%
+        );
+      }
 
-    .history-body.open {
-      display: flex;
-    }
+      .balance-card.behind {
+        border-color: var(--red-border);
+        background: linear-gradient(
+          180deg,
+          rgba(239, 68, 68, 0.08) 0%,
+          var(--card) 100%
+        );
+      }
 
-    .history-item {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 11px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+      .balance-top {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+      }
 
-    .history-item-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
+      .balance-label-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
 
-    .history-date {
-      font-size: 0.84rem;
-      font-weight: 700;
-      color: var(--text);
-    }
+      .balance-tag {
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+      }
 
-    .history-item-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
+      .balance-card.ahead .balance-tag {
+        color: var(--green);
+      }
 
-    .h-stat {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+      .balance-card.behind .balance-tag {
+        color: var(--red);
+      }
 
-    .h-stat-k {
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      font-weight: 600;
-    }
+      .balance-sub {
+        font-size: 0.78rem;
+        color: var(--text-dim);
+      }
 
-    .h-stat-v {
-      font-size: 0.86rem;
-      font-weight: 700;
-      color: var(--text);
-    }
+      .balance-value {
+        font-size: 2.35rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1;
+        color: var(--text);
+      }
 
-    .history-actions {
-      display: flex;
-      gap: 6px;
-      align-items: center;
-    }
+      .balance-card.ahead .balance-value {
+        color: var(--green);
+      }
 
-    /* Okno dialogowe (zamiast confirm/alert) */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(5, 7, 10, 0.78);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 1000;
-    }
+      .balance-card.behind .balance-value {
+        color: var(--red);
+      }
 
-    .modal-backdrop.open {
-      display: flex;
-    }
+      /* Wskaźnik bieżącego okrążenia z paskiem postępu */
+      .current-lap-bar-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+      }
 
-    .modal-box {
-      width: 100%;
-      max-width: 380px;
-      background: var(--card);
-      border: 1px solid var(--border-strong);
-      border-radius: 16px;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
-    }
+      .current-lap-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+      }
 
-    .modal-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-    }
+      .current-lap-delta {
+        font-weight: 700;
+      }
 
-    .modal-text {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
+      .current-lap-delta.ok {
+        color: var(--green);
+      }
 
-    .modal-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+      .current-lap-delta.over {
+        color: var(--red);
+      }
 
-    .modal-btn {
-      width: 100%;
-      padding: 11px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border-strong);
-      background: var(--card-elevated);
-      color: var(--text);
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
+      .progress-track {
+        width: 100%;
+        height: 8px;
+        background: var(--bg);
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+      }
 
-    .modal-btn.primary {
-      background: var(--blue);
-      border-color: var(--blue);
-      color: #ffffff;
-    }
+      .progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--green);
+        border-radius: 999px;
+        transition: background 0.2s;
+      }
 
-    .modal-btn.danger {
-      background: var(--red-bg);
-      border-color: var(--red-border);
-      color: #fca5a5;
-    }
+      .progress-fill.over {
+        background: var(--red);
+      }
 
-    /* Powiadomienie toast */
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 20px;
-      transform: translateX(-50%) translateY(24px);
-      background: #1e2430;
-      border: 1px solid var(--border-strong);
-      color: var(--text);
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 0.84rem;
-      font-weight: 600;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s, transform 0.2s;
-      z-index: 1100;
-      max-width: 92vw;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    }
+      /* Ogromny przycisk główny (mobile-first pod kciuk) */
+      .main-btn {
+        position: relative;
+        width: 100%;
+        min-height: 128px;
+        border-radius: 18px;
+        border: 2px solid var(--blue);
+        background: linear-gradient(180deg, #1d4ed8 0%, #1e40af 100%);
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        overflow: hidden;
+        padding: 14px 16px;
+        transition:
+          transform 0.08s ease,
+          background 0.2s,
+          border-color 0.2s,
+          opacity 0.2s;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <!-- 1. Górny pasek nagłówka -->
-    <header class="header">
-      <div class="brand">
-        <span id="statusDot" class="status-dot" aria-hidden="true"></span>
-        <h1 class="brand-title">TEMPO</h1>
-      </div>
-      <button id="goalToggleBtn" class="goal-toggle-btn tabular" type="button" aria-expanded="false">
-        <span class="goal-pill-label">Cel:</span>
-        <span id="goalSummaryText">06:00 | 10,0/h</span>
-      </button>
-    </header>
+      .main-btn:active:not(:disabled) {
+        transform: scale(0.985);
+      }
 
-    <!-- Panel konfiguracji progu docelowego -->
-    <section id="goalPanel" class="card goal-panel" aria-label="Ustawienia progu docelowego">
-      <div class="panel-header">
-        <span class="panel-title">Próg docelowy</span>
-        <button id="goalCloseBtn" class="mini-btn" type="button">Gotowe</button>
-      </div>
-      <div class="goal-grid">
-        <div class="field-group">
-          <label class="field-label" for="targetMin">Czas na 1 pozycję (MM:SS)</label>
-          <div class="time-inputs">
-            <input id="targetMin" class="input-box tabular" type="number" min="0" max="599" step="1" inputmode="numeric" aria-label="Minuty na pozycję">
-            <span class="time-sep">:</span>
-            <input id="targetSec" class="input-box tabular" type="number" min="0" max="59" step="1" inputmode="numeric" aria-label="Sekundy na pozycję">
+      .main-btn.running {
+        border-color: var(--green);
+        background: linear-gradient(180deg, #15803d 0%, #166534 100%);
+      }
+
+      .main-btn.running.over-target {
+        border-color: var(--red);
+        background: linear-gradient(180deg, #b91c1c 0%, #991b1b 100%);
+      }
+
+      .main-btn.paused {
+        border-color: #d97706;
+        background: linear-gradient(180deg, #92400e 0%, #78350f 100%);
+      }
+
+      .main-btn.locked {
+        opacity: 0.72;
+        cursor: wait;
+      }
+
+      .main-btn-top {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        opacity: 0.9;
+      }
+
+      .main-btn-timer {
+        font-size: 2.55rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+
+      .main-btn-action {
+        font-size: 0.92rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        opacity: 0.95;
+        margin-top: 2px;
+      }
+
+      .cooldown-bar {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        height: 4px;
+        width: 0%;
+        background: rgba(255, 255, 255, 0.85);
+      }
+
+      /* Rząd przycisków sterujących pod głównym przyciskiem */
+      .controls-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .ctrl-btn {
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--text);
+        padding: 12px 8px;
+        border-radius: var(--radius-sm);
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        touch-action: manipulation;
+        text-align: center;
+        transition:
+          background 0.15s,
+          border-color 0.15s,
+          opacity 0.15s;
+      }
+
+      .ctrl-btn:hover:not(:disabled) {
+        background: var(--card-elevated);
+        border-color: var(--border-strong);
+      }
+
+      .ctrl-btn:active:not(:disabled) {
+        transform: scale(0.98);
+      }
+
+      .ctrl-btn:disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
+      }
+
+      .ctrl-btn.danger-outline:not(:disabled):hover {
+        border-color: var(--red-border);
+        color: #fca5a5;
+      }
+
+      /* Siatka statystyk na żywo */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      @media (min-width: 480px) {
+        .stats-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .stat-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 11px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .stat-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+      }
+
+      .stat-value {
+        font-size: 1.18rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .stat-value.good {
+        color: var(--green);
+      }
+
+      .stat-value.bad {
+        color: var(--red);
+      }
+
+      /* Karta wykresu SVG */
+      .chart-card {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .chart-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 20px;
+      }
+
+      .chart-hover-info {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+
+      .chart-box {
+        width: 100%;
+        height: 155px;
+        position: relative;
+      }
+
+      .chart-box svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+        overflow: visible;
+      }
+
+      .chart-empty {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-dim);
+        font-size: 0.84rem;
+        border: 1px dashed var(--border);
+        border-radius: var(--radius-sm);
+      }
+
+      /* Lista pomiarów i eksport */
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+
+      .export-actions {
+        display: flex;
+        gap: 6px;
+      }
+
+      .mini-btn {
+        background: var(--bg);
+        border: 1px solid var(--border-strong);
+        color: var(--text);
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .mini-btn:hover:not(:disabled) {
+        border-color: var(--blue);
+        background: var(--card-elevated);
+      }
+
+      .mini-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      .lap-table-head {
+        display: grid;
+        grid-template-columns: 36px 1fr 1fr 68px 30px;
+        gap: 6px;
+        padding: 0 4px 8px;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-dim);
+      }
+
+      .lap-table-head span:nth-child(4) {
+        text-align: right;
+      }
+
+      .lap-list {
+        max-height: 310px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .lap-row {
+        display: grid;
+        grid-template-columns: 36px 1fr 1fr 68px 30px;
+        gap: 6px;
+        align-items: center;
+        padding: 9px 4px;
+        border-bottom: 1px solid rgba(38, 43, 54, 0.55);
+        font-size: 0.86rem;
+      }
+
+      .lap-row:last-child {
+        border-bottom: none;
+      }
+
+      .lap-num {
+        color: var(--text-muted);
+        font-weight: 700;
+      }
+
+      .lap-time {
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .lap-cum {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+      }
+
+      .lap-diff {
+        text-align: right;
+        font-weight: 700;
+        font-size: 0.82rem;
+      }
+
+      .lap-diff.plus {
+        color: var(--green);
+      }
+
+      .lap-diff.minus {
+        color: var(--red);
+      }
+
+      .row-del-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+        transition:
+          color 0.15s,
+          background 0.15s,
+          border-color 0.15s;
+      }
+
+      .row-del-btn:hover {
+        color: var(--red);
+        background: var(--red-bg);
+        border-color: var(--red-border);
+      }
+
+      .empty-msg {
+        padding: 20px 8px;
+        text-align: center;
+        color: var(--text-dim);
+        font-size: 0.84rem;
+      }
+
+      /* Zwijana sekcja historii sesji */
+      .history-toggle {
+        width: 100%;
+        background: transparent;
+        border: none;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 2px 0;
+        touch-action: manipulation;
+      }
+
+      .history-toggle-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .badge {
+        background: var(--card-elevated);
+        border: 1px solid var(--border-strong);
+        color: var(--text-muted);
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+      }
+
+      .chevron {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 700;
+        transition: transform 0.2s;
+      }
+
+      .chevron.open {
+        transform: rotate(180deg);
+      }
+
+      .history-body {
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+
+      .history-body.open {
+        display: flex;
+      }
+
+      .history-item {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 11px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .history-item-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .history-date {
+        font-size: 0.84rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .history-item-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+
+      .h-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .h-stat-k {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        font-weight: 600;
+      }
+
+      .h-stat-v {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .history-actions {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      /* Okno dialogowe (zamiast confirm/alert) */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(5, 7, 10, 0.78);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 1000;
+      }
+
+      .modal-backdrop.open {
+        display: flex;
+      }
+
+      .modal-box {
+        width: 100%;
+        max-width: 380px;
+        background: var(--card);
+        border: 1px solid var(--border-strong);
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+      }
+
+      .modal-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .modal-text {
+        font-size: 0.88rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      .modal-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .modal-btn {
+        width: 100%;
+        padding: 11px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border-strong);
+        background: var(--card-elevated);
+        color: var(--text);
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        touch-action: manipulation;
+      }
+
+      .modal-btn.primary {
+        background: var(--blue);
+        border-color: var(--blue);
+        color: #ffffff;
+      }
+
+      .modal-btn.danger {
+        background: var(--red-bg);
+        border-color: var(--red-border);
+        color: #fca5a5;
+      }
+
+      /* Powiadomienie toast */
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 20px;
+        transform: translateX(-50%) translateY(24px);
+        background: #1e2430;
+        border: 1px solid var(--border-strong);
+        color: var(--text);
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+        z-index: 1100;
+        max-width: 92vw;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    </style>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js", { scope: "./" });
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="app">
+      <!-- 1. Górny pasek nagłówka -->
+      <header class="header">
+        <div class="brand">
+          <span id="statusDot" class="status-dot" aria-hidden="true"></span>
+          <h1 class="brand-title">TEMPO</h1>
+        </div>
+        <button
+          id="goalToggleBtn"
+          class="goal-toggle-btn tabular"
+          type="button"
+          aria-expanded="false"
+        >
+          <span class="goal-pill-label">Cel:</span>
+          <span id="goalSummaryText">06:00 | 10,0/h</span>
+        </button>
+      </header>
+
+      <!-- Panel konfiguracji progu docelowego -->
+      <section
+        id="goalPanel"
+        class="card goal-panel"
+        aria-label="Ustawienia progu docelowego"
+      >
+        <div class="panel-header">
+          <span class="panel-title">Próg docelowy</span>
+          <button id="goalCloseBtn" class="mini-btn" type="button">
+            Gotowe
+          </button>
+        </div>
+        <div class="goal-grid">
+          <div class="field-group">
+            <label class="field-label" for="targetMin"
+              >Czas na 1 pozycję (MM:SS)</label
+            >
+            <div class="time-inputs">
+              <input
+                id="targetMin"
+                class="input-box tabular"
+                type="number"
+                min="0"
+                max="599"
+                step="1"
+                inputmode="numeric"
+                aria-label="Minuty na pozycję"
+              />
+              <span class="time-sep">:</span>
+              <input
+                id="targetSec"
+                class="input-box tabular"
+                type="number"
+                min="0"
+                max="59"
+                step="1"
+                inputmode="numeric"
+                aria-label="Sekundy na pozycję"
+              />
+            </div>
+          </div>
+          <div class="goal-divider">LUB</div>
+          <div class="field-group">
+            <label class="field-label" for="targetRate"
+              >Wydajność (szt. / godz.)</label
+            >
+            <input
+              id="targetRate"
+              class="input-box tabular"
+              type="number"
+              min="0.1"
+              max="360"
+              step="0.1"
+              inputmode="decimal"
+              aria-label="Wydajność na godzinę"
+            />
           </div>
         </div>
-        <div class="goal-divider">LUB</div>
-        <div class="field-group">
-          <label class="field-label" for="targetRate">Wydajność (szt. / godz.)</label>
-          <input id="targetRate" class="input-box tabular" type="number" min="0.1" max="360" step="0.1" inputmode="decimal" aria-label="Wydajność na godzinę">
+        <div class="setting-row">
+          <span class="setting-desc"
+            >Blokada podwójnego kliknięcia (1,5 s po zaliczeniu)</span
+          >
+          <label class="switch">
+            <input id="doubleTapGuard" type="checkbox" checked />
+            <span class="slider"></span>
+          </label>
         </div>
-      </div>
-      <div class="setting-row">
-        <span class="setting-desc">Blokada podwójnego kliknięcia (1,5 s po zaliczeniu)</span>
-        <label class="switch">
-          <input id="doubleTapGuard" type="checkbox" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-    </section>
+      </section>
 
-    <!-- 2. Wskaźnik bilansu na żywo względem progu -->
-    <section id="balanceCard" class="card balance-card" aria-live="polite">
-      <div class="balance-top">
-        <div class="balance-label-group">
-          <span id="balanceTag" class="balance-tag">Bilans sesji</span>
-          <span id="balanceSub" class="balance-sub">Brak ukończonych pozycji</span>
+      <!-- 2. Wskaźnik bilansu na żywo względem progu -->
+      <section id="balanceCard" class="card balance-card" aria-live="polite">
+        <div class="balance-top">
+          <div class="balance-label-group">
+            <span id="balanceTag" class="balance-tag">Bilans sesji</span>
+            <span id="balanceSub" class="balance-sub"
+              >Brak ukończonych pozycji</span
+            >
+          </div>
+          <div id="balanceValue" class="balance-value tabular">00:00</div>
         </div>
-        <div id="balanceValue" class="balance-value tabular">00:00</div>
-      </div>
 
-      <div class="current-lap-bar-wrap">
-        <div class="current-lap-meta">
-          <span id="currentLapLabel">Bieżąca pozycja</span>
-          <span id="currentLapDelta" class="current-lap-delta tabular">Próg: 06:00</span>
+        <div class="current-lap-bar-wrap">
+          <div class="current-lap-meta">
+            <span id="currentLapLabel">Bieżąca pozycja</span>
+            <span id="currentLapDelta" class="current-lap-delta tabular"
+              >Próg: 06:00</span
+            >
+          </div>
+          <div class="progress-track">
+            <div id="currentLapProgress" class="progress-fill"></div>
+          </div>
         </div>
-        <div class="progress-track">
-          <div id="currentLapProgress" class="progress-fill"></div>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 3. Ogromny przycisk główny i sterowanie -->
-    <button id="mainBtn" class="main-btn" type="button">
-      <span id="mainBtnTop" class="main-btn-top tabular">Gotowy do startu</span>
-      <span id="mainBtnTimer" class="main-btn-timer tabular">00:00.00</span>
-      <span id="mainBtnAction" class="main-btn-action">START</span>
-      <span id="cooldownBar" class="cooldown-bar"></span>
-    </button>
-
-    <div class="controls-row">
-      <button id="pauseBtn" class="ctrl-btn" type="button" disabled>Pauza</button>
-      <button id="undoBtn" class="ctrl-btn" type="button" disabled>Cofnij ostatnią</button>
-      <button id="finishBtn" class="ctrl-btn danger-outline" type="button" disabled>Zakończ / Zapisz</button>
-    </div>
-
-    <!-- 4. Siatka statystyk na żywo -->
-    <section class="stats-grid" aria-label="Statystyki bieżącej sesji">
-      <div class="stat-card">
-        <span class="stat-label">Pozycje</span>
-        <span id="statCount" class="stat-value tabular">0</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Czas łączny</span>
-        <span id="statTotal" class="stat-value tabular">00:00:00</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Średnia</span>
-        <span id="statAvg" class="stat-value tabular">--:--.--</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Mediana</span>
-        <span id="statMedian" class="stat-value tabular">--:--.--</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Tempo</span>
-        <span id="statRate" class="stat-value tabular">0,00 / h</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-label">Najlepszy czas</span>
-        <span id="statBest" class="stat-value tabular">--:--.--</span>
-      </div>
-    </section>
-
-    <!-- 5. Minimalistyczny wykres w czystym SVG -->
-    <section class="card chart-card" aria-label="Wykres czasów pozycji">
-      <div class="chart-meta">
-        <span class="panel-title">Czasy pozycji względem progu</span>
-        <span id="chartHoverInfo" class="chart-hover-info tabular"></span>
-      </div>
-      <div id="chartBox" class="chart-box">
-        <div class="chart-empty">Zalicz pierwszą pozycję, aby zobaczyć wykres</div>
-      </div>
-    </section>
-
-    <!-- 6. Lista pomiarów i eksport -->
-    <section class="card" aria-label="Lista zapisanych pomiarów">
-      <div class="section-header">
-        <span class="panel-title">Pomiary w sesji</span>
-        <div class="export-actions">
-          <button id="copyListBtn" class="mini-btn" type="button" disabled>Kopiuj listę</button>
-          <button id="exportCsvBtn" class="mini-btn" type="button" disabled>Eksport CSV</button>
-        </div>
-      </div>
-      <div class="lap-table-head">
-        <span>Nr</span>
-        <span>Czas</span>
-        <span>Łącznie</span>
-        <span>Bilans</span>
-        <span></span>
-      </div>
-      <div id="lapList" class="lap-list">
-        <div class="empty-msg">Brak zapisanych pomiarów w tej sesji</div>
-      </div>
-    </section>
-
-    <!-- 7. Zwijana historia zapisanych sesji -->
-    <section class="card" aria-label="Historia zapisanych sesji">
-      <button id="historyToggleBtn" class="history-toggle" type="button" aria-expanded="false">
-        <span class="history-toggle-left">
-          <span class="panel-title">Historia zapisanych sesji</span>
-          <span id="historyCountBadge" class="badge tabular">0</span>
-        </span>
-        <span id="historyChevron" class="chevron" aria-hidden="true">v</span>
+      <!-- 3. Ogromny przycisk główny i sterowanie -->
+      <button id="mainBtn" class="main-btn" type="button">
+        <span id="mainBtnTop" class="main-btn-top tabular"
+          >Gotowy do startu</span
+        >
+        <span id="mainBtnTimer" class="main-btn-timer tabular">00:00.00</span>
+        <span id="mainBtnAction" class="main-btn-action">START</span>
+        <span id="cooldownBar" class="cooldown-bar"></span>
       </button>
-      <div id="historyBody" class="history-body">
-        <div class="empty-msg">Brak zapisanych sesji w historii</div>
+
+      <div class="controls-row">
+        <button id="pauseBtn" class="ctrl-btn" type="button" disabled>
+          Pauza
+        </button>
+        <button id="undoBtn" class="ctrl-btn" type="button" disabled>
+          Cofnij ostatnią
+        </button>
+        <button
+          id="finishBtn"
+          class="ctrl-btn danger-outline"
+          type="button"
+          disabled
+        >
+          Zakończ / Zapisz
+        </button>
       </div>
-    </section>
-  </div>
 
-  <!-- Niestandardowy modal potwierdzeń (bez alert/confirm) -->
-  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-box">
-      <h2 id="modalTitle" class="modal-title">Potwierdzenie</h2>
-      <p id="modalText" class="modal-text"></p>
-      <div id="modalButtons" class="modal-buttons"></div>
+      <!-- 4. Siatka statystyk na żywo -->
+      <section class="stats-grid" aria-label="Statystyki bieżącej sesji">
+        <div class="stat-card">
+          <span class="stat-label">Pozycje</span>
+          <span id="statCount" class="stat-value tabular">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Czas łączny</span>
+          <span id="statTotal" class="stat-value tabular">00:00:00</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Średnia</span>
+          <span id="statAvg" class="stat-value tabular">--:--.--</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Mediana</span>
+          <span id="statMedian" class="stat-value tabular">--:--.--</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Tempo</span>
+          <span id="statRate" class="stat-value tabular">0,00 / h</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Najlepszy czas</span>
+          <span id="statBest" class="stat-value tabular">--:--.--</span>
+        </div>
+      </section>
+
+      <!-- 5. Minimalistyczny wykres w czystym SVG -->
+      <section class="card chart-card" aria-label="Wykres czasów pozycji">
+        <div class="chart-meta">
+          <span class="panel-title">Czasy pozycji względem progu</span>
+          <span id="chartHoverInfo" class="chart-hover-info tabular"></span>
+        </div>
+        <div id="chartBox" class="chart-box">
+          <div class="chart-empty">
+            Zalicz pierwszą pozycję, aby zobaczyć wykres
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Lista pomiarów i eksport -->
+      <section class="card" aria-label="Lista zapisanych pomiarów">
+        <div class="section-header">
+          <span class="panel-title">Pomiary w sesji</span>
+          <div class="export-actions">
+            <button id="copyListBtn" class="mini-btn" type="button" disabled>
+              Kopiuj listę
+            </button>
+            <button id="exportCsvBtn" class="mini-btn" type="button" disabled>
+              Eksport CSV
+            </button>
+          </div>
+        </div>
+        <div class="lap-table-head">
+          <span>Nr</span>
+          <span>Czas</span>
+          <span>Łącznie</span>
+          <span>Bilans</span>
+          <span></span>
+        </div>
+        <div id="lapList" class="lap-list">
+          <div class="empty-msg">Brak zapisanych pomiarów w tej sesji</div>
+        </div>
+      </section>
+
+      <!-- 7. Zwijana historia zapisanych sesji -->
+      <section class="card" aria-label="Historia zapisanych sesji">
+        <button
+          id="historyToggleBtn"
+          class="history-toggle"
+          type="button"
+          aria-expanded="false"
+        >
+          <span class="history-toggle-left">
+            <span class="panel-title">Historia zapisanych sesji</span>
+            <span id="historyCountBadge" class="badge tabular">0</span>
+          </span>
+          <span id="historyChevron" class="chevron" aria-hidden="true">v</span>
+        </button>
+        <div id="historyBody" class="history-body">
+          <div class="empty-msg">Brak zapisanych sesji w historii</div>
+        </div>
+      </section>
     </div>
-  </div>
 
-  <!-- Powiadomienie toast -->
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <!-- Niestandardowy modal potwierdzeń (bez alert/confirm) -->
+    <div
+      id="modalBackdrop"
+      class="modal-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+    >
+      <div class="modal-box">
+        <h2 id="modalTitle" class="modal-title">Potwierdzenie</h2>
+        <p id="modalText" class="modal-text"></p>
+        <div id="modalButtons" class="modal-buttons"></div>
+      </div>
+    </div>
 
-  <script>
-    (function () {
-      "use strict";
+    <!-- Powiadomienie toast -->
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-      /* Klucz zapisu w localStorage oraz stałe */
-      const STORAGE_KEY = "tempo_work_tracker_v1";
-      const LOCKOUT_MS = 1500;
+    <script>
+      (function () {
+        "use strict";
 
-      /* Domyślny stan aplikacji */
-      function createDefaultState() {
-        return {
-          status: "idle", // "idle" | "running" | "paused"
-          laps: [],       // [{ id: string, durationMs: number }]
-          currentLapStartTs: null,
-          currentLapAccumulatedMs: 0,
-          sessionStartedAt: null,
-          targetSeconds: 360, // domyślnie 06:00 (10.0 / godz.)
-          doubleTapGuard: true,
-          history: []
-        };
-      }
+        /* Klucz zapisu w localStorage oraz stałe */
+        const STORAGE_KEY = "tempo_work_tracker_v1";
+        const LOCKOUT_MS = 1500;
 
-      let state = loadState();
-      let rafId = null;
-      let lockoutUntil = 0;
-      let toastTimer = null;
-
-      /* Referencje do elementów DOM */
-      const els = {
-        statusDot: document.getElementById("statusDot"),
-        goalToggleBtn: document.getElementById("goalToggleBtn"),
-        goalSummaryText: document.getElementById("goalSummaryText"),
-        goalPanel: document.getElementById("goalPanel"),
-        goalCloseBtn: document.getElementById("goalCloseBtn"),
-        targetMin: document.getElementById("targetMin"),
-        targetSec: document.getElementById("targetSec"),
-        targetRate: document.getElementById("targetRate"),
-        doubleTapGuard: document.getElementById("doubleTapGuard"),
-
-        balanceCard: document.getElementById("balanceCard"),
-        balanceTag: document.getElementById("balanceTag"),
-        balanceSub: document.getElementById("balanceSub"),
-        balanceValue: document.getElementById("balanceValue"),
-        currentLapLabel: document.getElementById("currentLapLabel"),
-        currentLapDelta: document.getElementById("currentLapDelta"),
-        currentLapProgress: document.getElementById("currentLapProgress"),
-
-        mainBtn: document.getElementById("mainBtn"),
-        mainBtnTop: document.getElementById("mainBtnTop"),
-        mainBtnTimer: document.getElementById("mainBtnTimer"),
-        mainBtnAction: document.getElementById("mainBtnAction"),
-        cooldownBar: document.getElementById("cooldownBar"),
-
-        pauseBtn: document.getElementById("pauseBtn"),
-        undoBtn: document.getElementById("undoBtn"),
-        finishBtn: document.getElementById("finishBtn"),
-
-        statCount: document.getElementById("statCount"),
-        statTotal: document.getElementById("statTotal"),
-        statAvg: document.getElementById("statAvg"),
-        statMedian: document.getElementById("statMedian"),
-        statRate: document.getElementById("statRate"),
-        statBest: document.getElementById("statBest"),
-
-        chartBox: document.getElementById("chartBox"),
-        chartHoverInfo: document.getElementById("chartHoverInfo"),
-
-        copyListBtn: document.getElementById("copyListBtn"),
-        exportCsvBtn: document.getElementById("exportCsvBtn"),
-        lapList: document.getElementById("lapList"),
-
-        historyToggleBtn: document.getElementById("historyToggleBtn"),
-        historyCountBadge: document.getElementById("historyCountBadge"),
-        historyChevron: document.getElementById("historyChevron"),
-        historyBody: document.getElementById("historyBody"),
-
-        modalBackdrop: document.getElementById("modalBackdrop"),
-        modalTitle: document.getElementById("modalTitle"),
-        modalText: document.getElementById("modalText"),
-        modalButtons: document.getElementById("modalButtons"),
-        toast: document.getElementById("toast")
-      };
-
-      /* Bezpieczny odczyt i zapis localStorage */
-      function loadState() {
-        const fallback = createDefaultState();
-        try {
-          const raw = window.localStorage.getItem(STORAGE_KEY);
-          if (!raw) return fallback;
-          const parsed = JSON.parse(raw);
+        /* Domyślny stan aplikacji */
+        function createDefaultState() {
           return {
-            status: ["idle", "running", "paused"].includes(parsed.status) ? parsed.status : "idle",
-            laps: Array.isArray(parsed.laps) ? parsed.laps.filter(l => l && typeof l.durationMs === "number" && l.durationMs >= 0) : [],
-            currentLapStartTs: typeof parsed.currentLapStartTs === "number" ? parsed.currentLapStartTs : null,
-            currentLapAccumulatedMs: typeof parsed.currentLapAccumulatedMs === "number" ? Math.max(0, parsed.currentLapAccumulatedMs) : 0,
-            sessionStartedAt: typeof parsed.sessionStartedAt === "string" ? parsed.sessionStartedAt : null,
-            targetSeconds: typeof parsed.targetSeconds === "number" && parsed.targetSeconds >= 10 ? parsed.targetSeconds : 360,
-            doubleTapGuard: typeof parsed.doubleTapGuard === "boolean" ? parsed.doubleTapGuard : true,
-            history: Array.isArray(parsed.history) ? parsed.history : []
+            status: "idle", // "idle" | "running" | "paused"
+            laps: [], // [{ id: string, durationMs: number }]
+            currentLapStartTs: null,
+            currentLapAccumulatedMs: 0,
+            sessionStartedAt: null,
+            targetSeconds: 360, // domyślnie 06:00 (10.0 / godz.)
+            doubleTapGuard: true,
+            history: [],
           };
-        } catch (err) {
-          return fallback;
         }
-      }
 
-      function saveState() {
-        try {
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        } catch (err) {
-          /* Ignoruj błąd przepełnienia lub blokady storage */
+        let state = loadState();
+        let rafId = null;
+        let lockoutUntil = 0;
+        let toastTimer = null;
+
+        /* Referencje do elementów DOM */
+        const els = {
+          statusDot: document.getElementById("statusDot"),
+          goalToggleBtn: document.getElementById("goalToggleBtn"),
+          goalSummaryText: document.getElementById("goalSummaryText"),
+          goalPanel: document.getElementById("goalPanel"),
+          goalCloseBtn: document.getElementById("goalCloseBtn"),
+          targetMin: document.getElementById("targetMin"),
+          targetSec: document.getElementById("targetSec"),
+          targetRate: document.getElementById("targetRate"),
+          doubleTapGuard: document.getElementById("doubleTapGuard"),
+
+          balanceCard: document.getElementById("balanceCard"),
+          balanceTag: document.getElementById("balanceTag"),
+          balanceSub: document.getElementById("balanceSub"),
+          balanceValue: document.getElementById("balanceValue"),
+          currentLapLabel: document.getElementById("currentLapLabel"),
+          currentLapDelta: document.getElementById("currentLapDelta"),
+          currentLapProgress: document.getElementById("currentLapProgress"),
+
+          mainBtn: document.getElementById("mainBtn"),
+          mainBtnTop: document.getElementById("mainBtnTop"),
+          mainBtnTimer: document.getElementById("mainBtnTimer"),
+          mainBtnAction: document.getElementById("mainBtnAction"),
+          cooldownBar: document.getElementById("cooldownBar"),
+
+          pauseBtn: document.getElementById("pauseBtn"),
+          undoBtn: document.getElementById("undoBtn"),
+          finishBtn: document.getElementById("finishBtn"),
+
+          statCount: document.getElementById("statCount"),
+          statTotal: document.getElementById("statTotal"),
+          statAvg: document.getElementById("statAvg"),
+          statMedian: document.getElementById("statMedian"),
+          statRate: document.getElementById("statRate"),
+          statBest: document.getElementById("statBest"),
+
+          chartBox: document.getElementById("chartBox"),
+          chartHoverInfo: document.getElementById("chartHoverInfo"),
+
+          copyListBtn: document.getElementById("copyListBtn"),
+          exportCsvBtn: document.getElementById("exportCsvBtn"),
+          lapList: document.getElementById("lapList"),
+
+          historyToggleBtn: document.getElementById("historyToggleBtn"),
+          historyCountBadge: document.getElementById("historyCountBadge"),
+          historyChevron: document.getElementById("historyChevron"),
+          historyBody: document.getElementById("historyBody"),
+
+          modalBackdrop: document.getElementById("modalBackdrop"),
+          modalTitle: document.getElementById("modalTitle"),
+          modalText: document.getElementById("modalText"),
+          modalButtons: document.getElementById("modalButtons"),
+          toast: document.getElementById("toast"),
+        };
+
+        /* Bezpieczny odczyt i zapis localStorage */
+        function loadState() {
+          const fallback = createDefaultState();
+          try {
+            const raw = window.localStorage.getItem(STORAGE_KEY);
+            if (!raw) return fallback;
+            const parsed = JSON.parse(raw);
+            return {
+              status: ["idle", "running", "paused"].includes(parsed.status)
+                ? parsed.status
+                : "idle",
+              laps: Array.isArray(parsed.laps)
+                ? parsed.laps.filter(
+                    (l) =>
+                      l &&
+                      typeof l.durationMs === "number" &&
+                      l.durationMs >= 0,
+                  )
+                : [],
+              currentLapStartTs:
+                typeof parsed.currentLapStartTs === "number"
+                  ? parsed.currentLapStartTs
+                  : null,
+              currentLapAccumulatedMs:
+                typeof parsed.currentLapAccumulatedMs === "number"
+                  ? Math.max(0, parsed.currentLapAccumulatedMs)
+                  : 0,
+              sessionStartedAt:
+                typeof parsed.sessionStartedAt === "string"
+                  ? parsed.sessionStartedAt
+                  : null,
+              targetSeconds:
+                typeof parsed.targetSeconds === "number" &&
+                parsed.targetSeconds >= 10
+                  ? parsed.targetSeconds
+                  : 360,
+              doubleTapGuard:
+                typeof parsed.doubleTapGuard === "boolean"
+                  ? parsed.doubleTapGuard
+                  : true,
+              history: Array.isArray(parsed.history) ? parsed.history : [],
+            };
+          } catch (err) {
+            return fallback;
+          }
         }
-      }
 
-      /* Funkcje formatowania czasu */
-      function pad2(n) {
-        return String(Math.floor(Math.abs(n))).padStart(2, "0");
-      }
+        function saveState() {
+          try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          } catch (err) {
+            /* Ignoruj błąd przepełnienia lub blokady storage */
+          }
+        }
 
-      function formatLapMs(ms) {
-        const safe = Math.max(0, ms);
-        const totalCs = Math.floor(safe / 10);
-        const cs = totalCs % 100;
-        const totalSec = Math.floor(totalCs / 100);
-        const sec = totalSec % 60;
-        const totalMin = Math.floor(totalSec / 60);
-        if (totalMin >= 60) {
-          const hrs = Math.floor(totalMin / 60);
-          const min = totalMin % 60;
+        /* Funkcje formatowania czasu */
+        function pad2(n) {
+          return String(Math.floor(Math.abs(n))).padStart(2, "0");
+        }
+
+        function formatLapMs(ms) {
+          const safe = Math.max(0, ms);
+          const totalCs = Math.floor(safe / 10);
+          const cs = totalCs % 100;
+          const totalSec = Math.floor(totalCs / 100);
+          const sec = totalSec % 60;
+          const totalMin = Math.floor(totalSec / 60);
+          if (totalMin >= 60) {
+            const hrs = Math.floor(totalMin / 60);
+            const min = totalMin % 60;
+            return `${pad2(hrs)}:${pad2(min)}:${pad2(sec)}.${pad2(cs)}`;
+          }
+          return `${pad2(totalMin)}:${pad2(sec)}.${pad2(cs)}`;
+        }
+
+        function formatHMSCs(ms) {
+          const safe = Math.max(0, ms);
+          const totalCs = Math.floor(safe / 10);
+          const cs = totalCs % 100;
+          const totalSec = Math.floor(totalCs / 100);
+          const sec = totalSec % 60;
+          const min = Math.floor(totalSec / 60) % 60;
+          const hrs = Math.floor(totalSec / 3600);
           return `${pad2(hrs)}:${pad2(min)}:${pad2(sec)}.${pad2(cs)}`;
         }
-        return `${pad2(totalMin)}:${pad2(sec)}.${pad2(cs)}`;
-      }
 
-      function formatHMSCs(ms) {
-        const safe = Math.max(0, ms);
-        const totalCs = Math.floor(safe / 10);
-        const cs = totalCs % 100;
-        const totalSec = Math.floor(totalCs / 100);
-        const sec = totalSec % 60;
-        const min = Math.floor(totalSec / 60) % 60;
-        const hrs = Math.floor(totalSec / 3600);
-        return `${pad2(hrs)}:${pad2(min)}:${pad2(sec)}.${pad2(cs)}`;
-      }
-
-      function formatHMS(ms) {
-        const safe = Math.max(0, ms);
-        const totalSec = Math.floor(safe / 1000);
-        const sec = totalSec % 60;
-        const min = Math.floor(totalSec / 60) % 60;
-        const hrs = Math.floor(totalSec / 3600);
-        return `${pad2(hrs)}:${pad2(min)}:${pad2(sec)}`;
-      }
-
-      function formatShortMS(seconds) {
-        const totalSec = Math.round(Math.max(0, seconds));
-        const hrs = Math.floor(totalSec / 3600);
-        const min = Math.floor((totalSec % 3600) / 60);
-        const sec = totalSec % 60;
-        if (hrs > 0) {
+        function formatHMS(ms) {
+          const safe = Math.max(0, ms);
+          const totalSec = Math.floor(safe / 1000);
+          const sec = totalSec % 60;
+          const min = Math.floor(totalSec / 60) % 60;
+          const hrs = Math.floor(totalSec / 3600);
           return `${pad2(hrs)}:${pad2(min)}:${pad2(sec)}`;
         }
-        return `${pad2(min)}:${pad2(sec)}`;
-      }
 
-      function formatSignedMS(ms) {
-        const sign = ms >= 0 ? "+" : "-";
-        const absSec = Math.round(Math.abs(ms) / 1000);
-        return sign + formatShortMS(absSec);
-      }
-
-      function formatPlDecimal(num, decimals) {
-        return num.toFixed(decimals).replace(".", ",");
-      }
-
-      /* Obliczenia bieżącego czasu i statystyk */
-      function getCurrentLapMs(nowTs) {
-        if (state.status === "running" && state.currentLapStartTs !== null) {
-          return state.currentLapAccumulatedMs + Math.max(0, nowTs - state.currentLapStartTs);
-        }
-        return state.currentLapAccumulatedMs;
-      }
-
-      function computeStats() {
-        const count = state.laps.length;
-        const targetMs = state.targetSeconds * 1000;
-        let completedTotalMs = 0;
-        let bestMs = Infinity;
-
-        for (let i = 0; i < count; i++) {
-          const d = state.laps[i].durationMs;
-          completedTotalMs += d;
-          if (d < bestMs) bestMs = d;
+        function formatShortMS(seconds) {
+          const totalSec = Math.round(Math.max(0, seconds));
+          const hrs = Math.floor(totalSec / 3600);
+          const min = Math.floor((totalSec % 3600) / 60);
+          const sec = totalSec % 60;
+          if (hrs > 0) {
+            return `${pad2(hrs)}:${pad2(min)}:${pad2(sec)}`;
+          }
+          return `${pad2(min)}:${pad2(sec)}`;
         }
 
-        if (count === 0) {
+        function formatSignedMS(ms) {
+          const sign = ms >= 0 ? "+" : "-";
+          const absSec = Math.round(Math.abs(ms) / 1000);
+          return sign + formatShortMS(absSec);
+        }
+
+        function formatPlDecimal(num, decimals) {
+          return num.toFixed(decimals).replace(".", ",");
+        }
+
+        /* Obliczenia bieżącego czasu i statystyk */
+        function getCurrentLapMs(nowTs) {
+          if (state.status === "running" && state.currentLapStartTs !== null) {
+            return (
+              state.currentLapAccumulatedMs +
+              Math.max(0, nowTs - state.currentLapStartTs)
+            );
+          }
+          return state.currentLapAccumulatedMs;
+        }
+
+        function computeStats() {
+          const count = state.laps.length;
+          const targetMs = state.targetSeconds * 1000;
+          let completedTotalMs = 0;
+          let bestMs = Infinity;
+
+          for (let i = 0; i < count; i++) {
+            const d = state.laps[i].durationMs;
+            completedTotalMs += d;
+            if (d < bestMs) bestMs = d;
+          }
+
+          if (count === 0) {
+            return {
+              count: 0,
+              completedTotalMs: 0,
+              avgMs: 0,
+              medianMs: 0,
+              ratePerHour: 0,
+              bestMs: 0,
+              balanceMs: 0,
+            };
+          }
+
+          const avgMs = completedTotalMs / count;
+          const sorted = state.laps
+            .map((l) => l.durationMs)
+            .sort((a, b) => a - b);
+          const mid = Math.floor(count / 2);
+          const medianMs =
+            count % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+          const ratePerHour =
+            completedTotalMs > 0 ? (count * 3600000) / completedTotalMs : 0;
+          // Zapas dodatni gdy łączny czas jest krótszy niż (liczba * próg)
+          const balanceMs = count * targetMs - completedTotalMs;
+
           return {
-            count: 0,
-            completedTotalMs: 0,
-            avgMs: 0,
-            medianMs: 0,
-            ratePerHour: 0,
-            bestMs: 0,
-            balanceMs: 0
+            count,
+            completedTotalMs,
+            avgMs,
+            medianMs,
+            ratePerHour,
+            bestMs,
+            balanceMs,
           };
         }
 
-        const avgMs = completedTotalMs / count;
-        const sorted = state.laps.map(l => l.durationMs).sort((a, b) => a - b);
-        const mid = Math.floor(count / 2);
-        const medianMs = count % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-        const ratePerHour = completedTotalMs > 0 ? (count * 3600000) / completedTotalMs : 0;
-        // Zapas dodatni gdy łączny czas jest krótszy niż (liczba * próg)
-        const balanceMs = count * targetMs - completedTotalMs;
+        /* Synchronizacja pól ustawienia progu */
+        function syncGoalInputs(source) {
+          const totalSec = Math.max(
+            10,
+            Math.min(35999, Math.round(state.targetSeconds)),
+          );
+          const mins = Math.floor(totalSec / 60);
+          const secs = totalSec % 60;
+          const rate = 3600 / totalSec;
 
-        return {
-          count,
-          completedTotalMs,
-          avgMs,
-          medianMs,
-          ratePerHour,
-          bestMs,
-          balanceMs
-        };
-      }
-
-      /* Synchronizacja pól ustawienia progu */
-      function syncGoalInputs(source) {
-        const totalSec = Math.max(10, Math.min(35999, Math.round(state.targetSeconds)));
-        const mins = Math.floor(totalSec / 60);
-        const secs = totalSec % 60;
-        const rate = 3600 / totalSec;
-
-        if (source !== "time") {
-          els.targetMin.value = String(mins);
-          els.targetSec.value = String(secs);
-        }
-        if (source !== "rate") {
-          els.targetRate.value = rate.toFixed(1);
-        }
-
-        els.goalSummaryText.textContent = `${formatShortMS(totalSec)} | ${formatPlDecimal(rate, 1)}/h`;
-        els.doubleTapGuard.checked = state.doubleTapGuard;
-      }
-
-      function onTimeGoalChange() {
-        let m = parseInt(els.targetMin.value, 10);
-        let s = parseInt(els.targetSec.value, 10);
-        if (isNaN(m) || m < 0) m = 0;
-        if (isNaN(s) || s < 0) s = 0;
-        if (s > 59) s = 59;
-        const combined = Math.max(10, Math.min(35999, m * 60 + s));
-        state.targetSeconds = combined;
-        saveState();
-        syncGoalInputs("time");
-        renderAllStatic();
-        updateLiveDisplay(Date.now());
-      }
-
-      function onRateGoalChange() {
-        const val = parseFloat(String(els.targetRate.value).replace(",", "."));
-        if (isNaN(val) || val <= 0) return;
-        const clampedRate = Math.max(0.1, Math.min(360, val));
-        state.targetSeconds = Math.max(10, Math.min(35999, Math.round(3600 / clampedRate)));
-        saveState();
-        syncGoalInputs("rate");
-        renderAllStatic();
-        updateLiveDisplay(Date.now());
-      }
-
-      /* Aktualizacja płynnych liczników (wywoływana w pętli rAF) */
-      function updateLiveDisplay(nowTs) {
-        const currentLapMs = getCurrentLapMs(nowTs);
-        const targetMs = state.targetSeconds * 1000;
-        const stats = computeStats();
-
-        // Główny przycisk i jego stan
-        const isLocked = nowTs < lockoutUntil;
-        els.mainBtn.classList.toggle("locked", isLocked);
-
-        if (isLocked) {
-          const remainingRatio = Math.max(0, (lockoutUntil - nowTs) / LOCKOUT_MS);
-          els.cooldownBar.style.width = `${remainingRatio * 100}%`;
-        } else {
-          els.cooldownBar.style.width = "0%";
-        }
-
-        els.mainBtn.classList.remove("running", "paused", "over-target");
-
-        if (state.status === "idle") {
-          els.mainBtnTop.textContent = "Gotowy do startu";
-          els.mainBtnTimer.textContent = "00:00.00";
-          els.mainBtnAction.textContent = "START";
-        } else if (state.status === "running") {
-          els.mainBtn.classList.add("running");
-          if (currentLapMs > targetMs) {
-            els.mainBtn.classList.add("over-target");
+          if (source !== "time") {
+            els.targetMin.value = String(mins);
+            els.targetSec.value = String(secs);
           }
-          els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1}`;
-          els.mainBtnTimer.textContent = formatLapMs(currentLapMs);
-          els.mainBtnAction.textContent = "ZALICZ POZYCJĘ";
-        } else if (state.status === "paused") {
-          els.mainBtn.classList.add("paused");
-          els.mainBtnTop.textContent = `Wstrzymano — Pozycja #${state.laps.length + 1}`;
-          els.mainBtnTimer.textContent = formatLapMs(currentLapMs);
-          els.mainBtnAction.textContent = "WZNÓW POMIAR";
+          if (source !== "rate") {
+            els.targetRate.value = rate.toFixed(1);
+          }
+
+          els.goalSummaryText.textContent = `${formatShortMS(totalSec)} | ${formatPlDecimal(rate, 1)}/h`;
+          els.doubleTapGuard.checked = state.doubleTapGuard;
         }
 
-        // Czas łączny sesji (ukończone + aktywne okrążenie)
-        const liveSessionTotalMs = stats.completedTotalMs + (state.status === "idle" ? 0 : currentLapMs);
-        els.statTotal.textContent = formatHMS(liveSessionTotalMs);
+        function onTimeGoalChange() {
+          let m = parseInt(els.targetMin.value, 10);
+          let s = parseInt(els.targetSec.value, 10);
+          if (isNaN(m) || m < 0) m = 0;
+          if (isNaN(s) || s < 0) s = 0;
+          if (s > 59) s = 59;
+          const combined = Math.max(10, Math.min(35999, m * 60 + s));
+          state.targetSeconds = combined;
+          saveState();
+          syncGoalInputs("time");
+          renderAllStatic();
+          updateLiveDisplay(Date.now());
+        }
 
-        // Wskaźnik bieżącego okrążenia względem progu
-        if (state.status === "idle") {
-          els.currentLapLabel.textContent = "Bieżąca pozycja";
-          els.currentLapDelta.textContent = `Próg: ${formatShortMS(state.targetSeconds)}`;
-          els.currentLapDelta.className = "current-lap-delta tabular";
-          els.currentLapProgress.style.width = "0%";
-          els.currentLapProgress.classList.remove("over");
-        } else {
-          els.currentLapLabel.textContent = `Bieżąca pozycja #${state.laps.length + 1}`;
-          const diffToTargetMs = targetMs - currentLapMs;
-          const pct = Math.min(100, (currentLapMs / targetMs) * 100);
-          els.currentLapProgress.style.width = `${pct}%`;
+        function onRateGoalChange() {
+          const val = parseFloat(
+            String(els.targetRate.value).replace(",", "."),
+          );
+          if (isNaN(val) || val <= 0) return;
+          const clampedRate = Math.max(0.1, Math.min(360, val));
+          state.targetSeconds = Math.max(
+            10,
+            Math.min(35999, Math.round(3600 / clampedRate)),
+          );
+          saveState();
+          syncGoalInputs("rate");
+          renderAllStatic();
+          updateLiveDisplay(Date.now());
+        }
 
-          if (diffToTargetMs >= 0) {
-            els.currentLapDelta.textContent = `Zostało ${formatShortMS(Math.ceil(diffToTargetMs / 1000))}`;
-            els.currentLapDelta.className = "current-lap-delta tabular ok";
+        /* Aktualizacja płynnych liczników (wywoływana w pętli rAF) */
+        function updateLiveDisplay(nowTs) {
+          const currentLapMs = getCurrentLapMs(nowTs);
+          const targetMs = state.targetSeconds * 1000;
+          const stats = computeStats();
+
+          // Główny przycisk i jego stan
+          const isLocked = nowTs < lockoutUntil;
+          els.mainBtn.classList.toggle("locked", isLocked);
+
+          if (isLocked) {
+            const remainingRatio = Math.max(
+              0,
+              (lockoutUntil - nowTs) / LOCKOUT_MS,
+            );
+            els.cooldownBar.style.width = `${remainingRatio * 100}%`;
+          } else {
+            els.cooldownBar.style.width = "0%";
+          }
+
+          els.mainBtn.classList.remove("running", "paused", "over-target");
+
+          if (state.status === "idle") {
+            els.mainBtnTop.textContent = "Gotowy do startu";
+            els.mainBtnTimer.textContent = "00:00.00";
+            els.mainBtnAction.textContent = "START";
+          } else if (state.status === "running") {
+            els.mainBtn.classList.add("running");
+            if (currentLapMs > targetMs) {
+              els.mainBtn.classList.add("over-target");
+            }
+            els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1}`;
+            els.mainBtnTimer.textContent = formatLapMs(currentLapMs);
+            els.mainBtnAction.textContent = "ZALICZ POZYCJĘ";
+          } else if (state.status === "paused") {
+            els.mainBtn.classList.add("paused");
+            els.mainBtnTop.textContent = `Wstrzymano — Pozycja #${state.laps.length + 1}`;
+            els.mainBtnTimer.textContent = formatLapMs(currentLapMs);
+            els.mainBtnAction.textContent = "WZNÓW POMIAR";
+          }
+
+          // Czas łączny sesji (ukończone + aktywne okrążenie)
+          const liveSessionTotalMs =
+            stats.completedTotalMs +
+            (state.status === "idle" ? 0 : currentLapMs);
+          els.statTotal.textContent = formatHMS(liveSessionTotalMs);
+
+          // Wskaźnik bieżącego okrążenia względem progu
+          if (state.status === "idle") {
+            els.currentLapLabel.textContent = "Bieżąca pozycja";
+            els.currentLapDelta.textContent = `Próg: ${formatShortMS(state.targetSeconds)}`;
+            els.currentLapDelta.className = "current-lap-delta tabular";
+            els.currentLapProgress.style.width = "0%";
             els.currentLapProgress.classList.remove("over");
           } else {
-            els.currentLapDelta.textContent = `Przekroczono o ${formatShortMS(Math.floor(Math.abs(diffToTargetMs) / 1000))}`;
-            els.currentLapDelta.className = "current-lap-delta tabular over";
-            els.currentLapProgress.classList.add("over");
+            els.currentLapLabel.textContent = `Bieżąca pozycja #${state.laps.length + 1}`;
+            const diffToTargetMs = targetMs - currentLapMs;
+            const pct = Math.min(100, (currentLapMs / targetMs) * 100);
+            els.currentLapProgress.style.width = `${pct}%`;
+
+            if (diffToTargetMs >= 0) {
+              els.currentLapDelta.textContent = `Zostało ${formatShortMS(Math.ceil(diffToTargetMs / 1000))}`;
+              els.currentLapDelta.className = "current-lap-delta tabular ok";
+              els.currentLapProgress.classList.remove("over");
+            } else {
+              els.currentLapDelta.textContent = `Przekroczono o ${formatShortMS(Math.floor(Math.abs(diffToTargetMs) / 1000))}`;
+              els.currentLapDelta.className = "current-lap-delta tabular over";
+              els.currentLapProgress.classList.add("over");
+            }
           }
         }
-      }
 
-      /* Pętla odświeżania */
-      function tick() {
-        const nowTs = Date.now();
-        updateLiveDisplay(nowTs);
-        if (state.status === "running" || nowTs < lockoutUntil) {
-          rafId = window.requestAnimationFrame(tick);
-        } else {
-          rafId = null;
-        }
-      }
-
-      function ensureLoop() {
-        if (rafId === null && (state.status === "running" || Date.now() < lockoutUntil)) {
-          rafId = window.requestAnimationFrame(tick);
-        }
-      }
-
-      /* Renderowanie statycznych elementów (bilans, karty, wykres, lista, przyciski) */
-      function renderAllStatic() {
-        const stats = computeStats();
-        const targetMs = state.targetSeconds * 1000;
-
-        // Kropka statusu
-        els.statusDot.className = "status-dot" + (state.status !== "idle" ? ` ${state.status}` : "");
-
-        // Bilans sesji
-        els.balanceCard.classList.remove("ahead", "behind");
-        if (stats.count === 0) {
-          els.balanceTag.textContent = "Bilans sesji";
-          els.balanceSub.textContent = "Zostanie obliczony po 1. pozycji";
-          els.balanceValue.textContent = "00:00";
-        } else if (stats.balanceMs >= 0) {
-          els.balanceCard.classList.add("ahead");
-          els.balanceTag.textContent = "ZAPAS CZASU";
-          els.balanceSub.textContent = `Przed planem po ${stats.count} ${pluralPozycja(stats.count)}`;
-          els.balanceValue.textContent = formatSignedMS(stats.balanceMs);
-        } else {
-          els.balanceCard.classList.add("behind");
-          els.balanceTag.textContent = "STRATA CZASU";
-          els.balanceSub.textContent = `Za planem po ${stats.count} ${pluralPozycja(stats.count)}`;
-          els.balanceValue.textContent = formatSignedMS(stats.balanceMs);
+        /* Pętla odświeżania */
+        function tick() {
+          const nowTs = Date.now();
+          updateLiveDisplay(nowTs);
+          if (state.status === "running" || nowTs < lockoutUntil) {
+            rafId = window.requestAnimationFrame(tick);
+          } else {
+            rafId = null;
+          }
         }
 
-        // Przyciski sterujące
-        const hasActivity = state.status !== "idle" || stats.count > 0;
-        els.pauseBtn.disabled = state.status === "idle";
-        els.pauseBtn.textContent = state.status === "paused" ? "Wznów" : "Pauza";
-        els.undoBtn.disabled = stats.count === 0;
-        els.finishBtn.disabled = !hasActivity;
-        els.copyListBtn.disabled = stats.count === 0;
-        els.exportCsvBtn.disabled = stats.count === 0;
-
-        // Karty statystyk
-        els.statCount.textContent = String(stats.count);
-        els.statAvg.className = "stat-value tabular";
-        if (stats.count > 0) {
-          els.statAvg.textContent = formatLapMs(stats.avgMs);
-          els.statAvg.classList.add(stats.avgMs <= targetMs ? "good" : "bad");
-          els.statMedian.textContent = formatLapMs(stats.medianMs);
-          els.statRate.textContent = `${formatPlDecimal(stats.ratePerHour, 2)} / h`;
-          els.statBest.textContent = formatLapMs(stats.bestMs);
-        } else {
-          els.statAvg.textContent = "--:--.--";
-          els.statMedian.textContent = "--:--.--";
-          els.statRate.textContent = "0,00 / h";
-          els.statBest.textContent = "--:--.--";
+        function ensureLoop() {
+          if (
+            rafId === null &&
+            (state.status === "running" || Date.now() < lockoutUntil)
+          ) {
+            rafId = window.requestAnimationFrame(tick);
+          }
         }
 
-        renderSvgChart(stats);
-        renderLapList();
-        renderHistory();
-      }
+        /* Renderowanie statycznych elementów (bilans, karty, wykres, lista, przyciski) */
+        function renderAllStatic() {
+          const stats = computeStats();
+          const targetMs = state.targetSeconds * 1000;
 
-      /* Odmiana słowa "pozycja" po liczbie */
-      function pluralPozycja(n) {
-        if (n === 1) return "pozycji";
-        return "pozycjach";
-      }
+          // Kropka statusu
+          els.statusDot.className =
+            "status-dot" + (state.status !== "idle" ? ` ${state.status}` : "");
 
-      /* Renderowanie minimalistycznego wykresu słupkowego w czystym SVG */
-      function renderSvgChart() {
-        els.chartHoverInfo.textContent = "";
-        const laps = state.laps;
-        if (laps.length === 0) {
-          els.chartBox.innerHTML = '<div class="chart-empty">Zalicz pierwszą pozycję, aby zobaczyć wykres</div>';
-          return;
+          // Bilans sesji
+          els.balanceCard.classList.remove("ahead", "behind");
+          if (stats.count === 0) {
+            els.balanceTag.textContent = "Bilans sesji";
+            els.balanceSub.textContent = "Zostanie obliczony po 1. pozycji";
+            els.balanceValue.textContent = "00:00";
+          } else if (stats.balanceMs >= 0) {
+            els.balanceCard.classList.add("ahead");
+            els.balanceTag.textContent = "ZAPAS CZASU";
+            els.balanceSub.textContent = `Przed planem po ${stats.count} ${pluralPozycja(stats.count)}`;
+            els.balanceValue.textContent = formatSignedMS(stats.balanceMs);
+          } else {
+            els.balanceCard.classList.add("behind");
+            els.balanceTag.textContent = "STRATA CZASU";
+            els.balanceSub.textContent = `Za planem po ${stats.count} ${pluralPozycja(stats.count)}`;
+            els.balanceValue.textContent = formatSignedMS(stats.balanceMs);
+          }
+
+          // Przyciski sterujące
+          const hasActivity = state.status !== "idle" || stats.count > 0;
+          els.pauseBtn.disabled = state.status === "idle";
+          els.pauseBtn.textContent =
+            state.status === "paused" ? "Wznów" : "Pauza";
+          els.undoBtn.disabled = stats.count === 0;
+          els.finishBtn.disabled = !hasActivity;
+          els.copyListBtn.disabled = stats.count === 0;
+          els.exportCsvBtn.disabled = stats.count === 0;
+
+          // Karty statystyk
+          els.statCount.textContent = String(stats.count);
+          els.statAvg.className = "stat-value tabular";
+          if (stats.count > 0) {
+            els.statAvg.textContent = formatLapMs(stats.avgMs);
+            els.statAvg.classList.add(stats.avgMs <= targetMs ? "good" : "bad");
+            els.statMedian.textContent = formatLapMs(stats.medianMs);
+            els.statRate.textContent = `${formatPlDecimal(stats.ratePerHour, 2)} / h`;
+            els.statBest.textContent = formatLapMs(stats.bestMs);
+          } else {
+            els.statAvg.textContent = "--:--.--";
+            els.statMedian.textContent = "--:--.--";
+            els.statRate.textContent = "0,00 / h";
+            els.statBest.textContent = "--:--.--";
+          }
+
+          renderSvgChart(stats);
+          renderLapList();
+          renderHistory();
         }
 
-        const targetMs = state.targetSeconds * 1000;
-        const maxLapMs = Math.max(...laps.map(l => l.durationMs));
-        const maxScaleMs = Math.max(targetMs * 1.25, maxLapMs * 1.1, 60000);
-
-        const vbW = 480;
-        const vbH = 150;
-        const padLeft = 40;
-        const padRight = 10;
-        const padTop = 12;
-        const padBottom = 20;
-        const plotW = vbW - padLeft - padRight;
-        const plotH = vbH - padTop - padBottom;
-
-        const yForMs = (ms) => padTop + plotH - (ms / maxScaleMs) * plotH;
-        const targetY = yForMs(targetMs);
-
-        const count = laps.length;
-        const step = plotW / count;
-        const gap = count > 35 ? 1.5 : count > 15 ? 3 : 5;
-        const barW = Math.max(3, Math.min(34, step - gap));
-
-        let barsHtml = "";
-        for (let i = 0; i < count; i++) {
-          const lap = laps[i];
-          const barH = Math.max(2, (lap.durationMs / maxScaleMs) * plotH);
-          const x = padLeft + i * step + (step - barW) / 2;
-          const y = padTop + plotH - barH;
-          const fill = lap.durationMs <= targetMs ? "#22c55e" : "#ef4444";
-          const radius = barW > 8 ? 3 : 1.5;
-          barsHtml += `<rect class="svg-bar" data-idx="${i}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="${radius}" fill="${fill}" opacity="0.9" style="cursor:pointer"></rect>`;
+        /* Odmiana słowa "pozycja" po liczbie */
+        function pluralPozycja(n) {
+          if (n === 1) return "pozycji";
+          return "pozycjach";
         }
 
-        // Etykiety osi X (pierwszy, środkowy, ostatni)
-        let xLabelsHtml = `<text x="${padLeft + step / 2}" y="${vbH - 4}" fill="#64748b" font-size="10" text-anchor="middle">1</text>`;
-        if (count >= 3) {
-          const midIdx = Math.floor((count - 1) / 2);
-          xLabelsHtml += `<text x="${padLeft + midIdx * step + step / 2}" y="${vbH - 4}" fill="#64748b" font-size="10" text-anchor="middle">${midIdx + 1}</text>`;
-        }
-        if (count >= 2) {
-          xLabelsHtml += `<text x="${padLeft + (count - 1) * step + step / 2}" y="${vbH - 4}" fill="#64748b" font-size="10" text-anchor="middle">${count}</text>`;
-        }
+        /* Renderowanie minimalistycznego wykresu słupkowego w czystym SVG */
+        function renderSvgChart() {
+          els.chartHoverInfo.textContent = "";
+          const laps = state.laps;
+          if (laps.length === 0) {
+            els.chartBox.innerHTML =
+              '<div class="chart-empty">Zalicz pierwszą pozycję, aby zobaczyć wykres</div>';
+            return;
+          }
 
-        const svgHtml = `
+          const targetMs = state.targetSeconds * 1000;
+          const maxLapMs = Math.max(...laps.map((l) => l.durationMs));
+          const maxScaleMs = Math.max(targetMs * 1.25, maxLapMs * 1.1, 60000);
+
+          const vbW = 480;
+          const vbH = 150;
+          const padLeft = 40;
+          const padRight = 10;
+          const padTop = 12;
+          const padBottom = 20;
+          const plotW = vbW - padLeft - padRight;
+          const plotH = vbH - padTop - padBottom;
+
+          const yForMs = (ms) => padTop + plotH - (ms / maxScaleMs) * plotH;
+          const targetY = yForMs(targetMs);
+
+          const count = laps.length;
+          const step = plotW / count;
+          const gap = count > 35 ? 1.5 : count > 15 ? 3 : 5;
+          const barW = Math.max(3, Math.min(34, step - gap));
+
+          let barsHtml = "";
+          for (let i = 0; i < count; i++) {
+            const lap = laps[i];
+            const barH = Math.max(2, (lap.durationMs / maxScaleMs) * plotH);
+            const x = padLeft + i * step + (step - barW) / 2;
+            const y = padTop + plotH - barH;
+            const fill = lap.durationMs <= targetMs ? "#22c55e" : "#ef4444";
+            const radius = barW > 8 ? 3 : 1.5;
+            barsHtml += `<rect class="svg-bar" data-idx="${i}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="${radius}" fill="${fill}" opacity="0.9" style="cursor:pointer"></rect>`;
+          }
+
+          // Etykiety osi X (pierwszy, środkowy, ostatni)
+          let xLabelsHtml = `<text x="${padLeft + step / 2}" y="${vbH - 4}" fill="#64748b" font-size="10" text-anchor="middle">1</text>`;
+          if (count >= 3) {
+            const midIdx = Math.floor((count - 1) / 2);
+            xLabelsHtml += `<text x="${padLeft + midIdx * step + step / 2}" y="${vbH - 4}" fill="#64748b" font-size="10" text-anchor="middle">${midIdx + 1}</text>`;
+          }
+          if (count >= 2) {
+            xLabelsHtml += `<text x="${padLeft + (count - 1) * step + step / 2}" y="${vbH - 4}" fill="#64748b" font-size="10" text-anchor="middle">${count}</text>`;
+          }
+
+          const svgHtml = `
           <svg viewBox="0 0 ${vbW} ${vbH}" preserveAspectRatio="none" aria-label="Wykres słupkowy czasów">
             <!-- Linia osi dolnej i górnej siatki -->
             <line x1="${padLeft}" y1="${padTop}" x2="${vbW - padRight}" y2="${padTop}" stroke="#262b36" stroke-width="1" />
@@ -1605,81 +1783,84 @@
           </svg>
         `;
 
-        els.chartBox.innerHTML = svgHtml;
+          els.chartBox.innerHTML = svgHtml;
 
-        // Podgląd dokładnego czasu po kliknięciu lub najechaniu na słupek
-        const bars = els.chartBox.querySelectorAll(".svg-bar");
-        bars.forEach((bar) => {
-          const showBarInfo = () => {
-            const idx = parseInt(bar.getAttribute("data-idx"), 10);
-            const lap = state.laps[idx];
-            if (!lap) return;
+          // Podgląd dokładnego czasu po kliknięciu lub najechaniu na słupek
+          const bars = els.chartBox.querySelectorAll(".svg-bar");
+          bars.forEach((bar) => {
+            const showBarInfo = () => {
+              const idx = parseInt(bar.getAttribute("data-idx"), 10);
+              const lap = state.laps[idx];
+              if (!lap) return;
+              const diffMs = targetMs - lap.durationMs;
+              els.chartHoverInfo.textContent = `#${idx + 1}: ${formatLapMs(lap.durationMs)} (${formatSignedMS(diffMs)})`;
+            };
+            bar.addEventListener("mouseenter", showBarInfo);
+            bar.addEventListener("click", showBarInfo);
+          });
+        }
+
+        /* Renderowanie listy pomiarów (od najnowszej na górze) */
+        function renderLapList() {
+          const laps = state.laps;
+          if (laps.length === 0) {
+            els.lapList.innerHTML =
+              '<div class="empty-msg">Brak zapisanych pomiarów w tej sesji</div>';
+            return;
+          }
+
+          const targetMs = state.targetSeconds * 1000;
+          // Wyliczamy czasy narastające od początku
+          const cumulative = [];
+          let runningSum = 0;
+          for (let i = 0; i < laps.length; i++) {
+            runningSum += laps[i].durationMs;
+            cumulative.push(runningSum);
+          }
+
+          const frag = document.createDocumentFragment();
+          for (let i = laps.length - 1; i >= 0; i--) {
+            const lap = laps[i];
             const diffMs = targetMs - lap.durationMs;
-            els.chartHoverInfo.textContent = `#${idx + 1}: ${formatLapMs(lap.durationMs)} (${formatSignedMS(diffMs)})`;
-          };
-          bar.addEventListener("mouseenter", showBarInfo);
-          bar.addEventListener("click", showBarInfo);
-        });
-      }
+            const isPlus = diffMs >= 0;
 
-      /* Renderowanie listy pomiarów (od najnowszej na górze) */
-      function renderLapList() {
-        const laps = state.laps;
-        if (laps.length === 0) {
-          els.lapList.innerHTML = '<div class="empty-msg">Brak zapisanych pomiarów w tej sesji</div>';
-          return;
-        }
-
-        const targetMs = state.targetSeconds * 1000;
-        // Wyliczamy czasy narastające od początku
-        const cumulative = [];
-        let runningSum = 0;
-        for (let i = 0; i < laps.length; i++) {
-          runningSum += laps[i].durationMs;
-          cumulative.push(runningSum);
-        }
-
-        const frag = document.createDocumentFragment();
-        for (let i = laps.length - 1; i >= 0; i--) {
-          const lap = laps[i];
-          const diffMs = targetMs - lap.durationMs;
-          const isPlus = diffMs >= 0;
-
-          const row = document.createElement("div");
-          row.className = "lap-row tabular";
-          row.innerHTML = `
+            const row = document.createElement("div");
+            row.className = "lap-row tabular";
+            row.innerHTML = `
             <span class="lap-num">#${i + 1}</span>
             <span class="lap-time">${formatLapMs(lap.durationMs)}</span>
             <span class="lap-cum">${formatHMSCs(cumulative[i])}</span>
             <span class="lap-diff ${isPlus ? "plus" : "minus"}">${formatSignedMS(diffMs)}</span>
             <button class="row-del-btn" type="button" data-del-id="${lap.id}" aria-label="Usuń pomiar numer ${i + 1}" title="Usuń ten pomiar">x</button>
           `;
-          frag.appendChild(row);
+            frag.appendChild(row);
+          }
+
+          els.lapList.innerHTML = "";
+          els.lapList.appendChild(frag);
         }
 
-        els.lapList.innerHTML = "";
-        els.lapList.appendChild(frag);
-      }
+        /* Renderowanie historii sesji */
+        function renderHistory() {
+          const list = state.history;
+          els.historyCountBadge.textContent = String(list.length);
 
-      /* Renderowanie historii sesji */
-      function renderHistory() {
-        const list = state.history;
-        els.historyCountBadge.textContent = String(list.length);
+          if (list.length === 0) {
+            els.historyBody.innerHTML =
+              '<div class="empty-msg">Brak zapisanych sesji w historii</div>';
+            return;
+          }
 
-        if (list.length === 0) {
-          els.historyBody.innerHTML = '<div class="empty-msg">Brak zapisanych sesji w historii</div>';
-          return;
-        }
+          const frag = document.createDocumentFragment();
+          for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            const balanceMs =
+              item.count * item.targetSeconds * 1000 - item.totalMs;
+            const balClass = balanceMs >= 0 ? "good" : "bad";
 
-        const frag = document.createDocumentFragment();
-        for (let i = 0; i < list.length; i++) {
-          const item = list[i];
-          const balanceMs = item.count * item.targetSeconds * 1000 - item.totalMs;
-          const balClass = balanceMs >= 0 ? "good" : "bad";
-
-          const card = document.createElement("div");
-          card.className = "history-item";
-          card.innerHTML = `
+            const card = document.createElement("div");
+            card.className = "history-item";
+            card.innerHTML = `
             <div class="history-item-top">
               <span class="history-date tabular">${escapeHtml(item.dateLabel)}</span>
               <div class="history-actions">
@@ -1706,425 +1887,440 @@
               </div>
             </div>
           `;
-          frag.appendChild(card);
+            frag.appendChild(card);
+          }
+
+          els.historyBody.innerHTML = "";
+          els.historyBody.appendChild(frag);
         }
 
-        els.historyBody.innerHTML = "";
-        els.historyBody.appendChild(frag);
-      }
-
-      function escapeHtml(str) {
-        return String(str)
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-          .replace(/"/g, "&quot;");
-      }
-
-      /* Akcje stopera */
-      function triggerVibration(ms) {
-        try {
-          if (navigator.vibrate) navigator.vibrate(ms);
-        } catch (err) {
-          /* Brak wsparcia wibracji */
-        }
-      }
-
-      function handleMainButtonClick() {
-        const nowTs = Date.now();
-        if (nowTs < lockoutUntil) {
-          return;
+        function escapeHtml(str) {
+          return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
         }
 
-        if (state.status === "idle") {
-          state.status = "running";
+        /* Akcje stopera */
+        function triggerVibration(ms) {
+          try {
+            if (navigator.vibrate) navigator.vibrate(ms);
+          } catch (err) {
+            /* Brak wsparcia wibracji */
+          }
+        }
+
+        function handleMainButtonClick() {
+          const nowTs = Date.now();
+          if (nowTs < lockoutUntil) {
+            return;
+          }
+
+          if (state.status === "idle") {
+            state.status = "running";
+            state.currentLapAccumulatedMs = 0;
+            state.currentLapStartTs = nowTs;
+            state.sessionStartedAt = new Date(nowTs).toISOString();
+            triggerVibration(30);
+            saveState();
+            renderAllStatic();
+            updateLiveDisplay(nowTs);
+            ensureLoop();
+            return;
+          }
+
+          if (state.status === "paused") {
+            resumeTimer();
+            return;
+          }
+
+          // Stan running: zaliczamy pozycję
+          const lapMs = getCurrentLapMs(nowTs);
+          state.laps.push({
+            id: `${nowTs}_${Math.random().toString(36).slice(2, 7)}`,
+            durationMs: lapMs,
+          });
           state.currentLapAccumulatedMs = 0;
           state.currentLapStartTs = nowTs;
-          state.sessionStartedAt = new Date(nowTs).toISOString();
+
+          if (state.doubleTapGuard) {
+            lockoutUntil = nowTs + LOCKOUT_MS;
+          }
+
           triggerVibration(30);
           saveState();
           renderAllStatic();
           updateLiveDisplay(nowTs);
           ensureLoop();
-          return;
         }
 
-        if (state.status === "paused") {
-          resumeTimer();
-          return;
+        function pauseTimer() {
+          if (state.status !== "running") return;
+          const nowTs = Date.now();
+          state.currentLapAccumulatedMs = getCurrentLapMs(nowTs);
+          state.currentLapStartTs = null;
+          state.status = "paused";
+          saveState();
+          renderAllStatic();
+          updateLiveDisplay(nowTs);
         }
 
-        // Stan running: zaliczamy pozycję
-        const lapMs = getCurrentLapMs(nowTs);
-        state.laps.push({
-          id: `${nowTs}_${Math.random().toString(36).slice(2, 7)}`,
-          durationMs: lapMs
-        });
-        state.currentLapAccumulatedMs = 0;
-        state.currentLapStartTs = nowTs;
-
-        if (state.doubleTapGuard) {
-          lockoutUntil = nowTs + LOCKOUT_MS;
-        }
-
-        triggerVibration(30);
-        saveState();
-        renderAllStatic();
-        updateLiveDisplay(nowTs);
-        ensureLoop();
-      }
-
-      function pauseTimer() {
-        if (state.status !== "running") return;
-        const nowTs = Date.now();
-        state.currentLapAccumulatedMs = getCurrentLapMs(nowTs);
-        state.currentLapStartTs = null;
-        state.status = "paused";
-        saveState();
-        renderAllStatic();
-        updateLiveDisplay(nowTs);
-      }
-
-      function resumeTimer() {
-        if (state.status !== "paused") return;
-        const nowTs = Date.now();
-        state.currentLapStartTs = nowTs;
-        state.status = "running";
-        triggerVibration(20);
-        saveState();
-        renderAllStatic();
-        updateLiveDisplay(nowTs);
-        ensureLoop();
-      }
-
-      function handleUndoLast() {
-        if (state.laps.length === 0) return;
-        const nowTs = Date.now();
-        const removed = state.laps.pop();
-
-        // Przywracamy czas cofniętej pozycji do bieżącego okrążenia, jeśli sesja jest aktywna
-        if (state.status === "running" || state.status === "paused") {
-          state.currentLapAccumulatedMs += removed.durationMs;
-        }
-
-        lockoutUntil = 0;
-        saveState();
-        renderAllStatic();
-        updateLiveDisplay(nowTs);
-        showToast(`Cofnięto pozycję #${state.laps.length + 1} (${formatLapMs(removed.durationMs)})`);
-      }
-
-      function deleteSingleLap(lapId) {
-        const idx = state.laps.findIndex(l => l.id === lapId);
-        if (idx === -1) return;
-        const removed = state.laps.splice(idx, 1)[0];
-        saveState();
-        renderAllStatic();
-        updateLiveDisplay(Date.now());
-        showToast(`Usunięto pomiar #${idx + 1} (${formatLapMs(removed.durationMs)})`);
-      }
-
-      /* Zakończenie i zapisanie sesji do historii */
-      function openFinishModal() {
-        const stats = computeStats();
-        const summary = stats.count > 0
-          ? `Ukończone pozycje: ${stats.count}. Średnia: ${formatLapMs(stats.avgMs)}, tempo: ${formatPlDecimal(stats.ratePerHour, 2)} szt./godz.`
-          : "Nie zaliczono jeszcze żadnej ukończonej pozycji. Możesz wyzerować stoper.";
-
-        const buttons = [];
-        if (stats.count > 0) {
-          buttons.push({
-            label: "Zapisz w historii i wyzeruj",
-            className: "primary",
-            onClick: () => {
-              archiveCurrentSession();
-              resetCurrentSession();
-              closeModal();
-              showToast("Sesja zapisana w historii");
-            }
-          });
-        }
-
-        buttons.push({
-          label: "Wyzeruj bez zapisu",
-          className: "danger",
-          onClick: () => {
-            resetCurrentSession();
-            closeModal();
-            showToast("Sesja została wyzerowana");
-          }
-        });
-
-        buttons.push({
-          label: "Anuluj",
-          className: "",
-          onClick: closeModal
-        });
-
-        openModal("Zakończyć bieżącą sesję?", summary, buttons);
-      }
-
-      function archiveCurrentSession() {
-        const stats = computeStats();
-        if (stats.count === 0) return;
-
-        const now = new Date();
-        const dateLabel = `${pad2(now.getDate())}.${pad2(now.getMonth() + 1)}.${now.getFullYear()} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
-
-        const record = {
-          id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          dateLabel,
-          count: stats.count,
-          totalMs: stats.completedTotalMs,
-          avgMs: stats.avgMs,
-          medianMs: stats.medianMs,
-          ratePerHour: stats.ratePerHour,
-          bestMs: stats.bestMs,
-          targetSeconds: state.targetSeconds,
-          laps: state.laps.map(l => ({ durationMs: l.durationMs }))
-        };
-
-        state.history.unshift(record);
-      }
-
-      function resetCurrentSession() {
-        state.status = "idle";
-        state.laps = [];
-        state.currentLapStartTs = null;
-        state.currentLapAccumulatedMs = 0;
-        state.sessionStartedAt = null;
-        lockoutUntil = 0;
-        saveState();
-        renderAllStatic();
-        updateLiveDisplay(Date.now());
-      }
-
-      /* Eksport i kopiowanie listy */
-      function buildPlainTextReport(laps) {
-        let sum = 0;
-        const lines = [];
-        for (let i = 0; i < laps.length; i++) {
-          sum += laps[i].durationMs;
-          const nr = String(i + 1).padStart(3, " ");
-          const lapStr = formatHMSCs(laps[i].durationMs);
-          const cumStr = formatHMSCs(sum);
-          lines.push(`${nr}   ${lapStr}   ${cumStr}`);
-        }
-        return lines.join("\n");
-      }
-
-      function copyToClipboard(text, successMsg) {
-        try {
-          const ta = document.createElement("textarea");
-          ta.value = text;
-          ta.setAttribute("readonly", "");
-          ta.style.position = "fixed";
-          ta.style.top = "-9999px";
-          ta.style.left = "-9999px";
-          document.body.appendChild(ta);
-          ta.select();
-          ta.setSelectionRange(0, text.length);
-          const ok = document.execCommand("copy");
-          document.body.removeChild(ta);
-          if (ok) {
-            showToast(successMsg);
-          } else {
-            showToast("Nie udało się skopiować do schowka");
-          }
-        } catch (err) {
-          showToast("Brak dostępu do schowka");
-        }
-      }
-
-      function exportCsv() {
-        if (state.laps.length === 0) return;
-        const targetMs = state.targetSeconds * 1000;
-        const rows = ["Nr;Czas pozycji;Czas laczny;Sekundy;Bilans wzgledem progu"];
-        let sum = 0;
-
-        for (let i = 0; i < state.laps.length; i++) {
-          const d = state.laps[i].durationMs;
-          sum += d;
-          const diff = targetMs - d;
-          rows.push([
-            i + 1,
-            formatHMSCs(d),
-            formatHMSCs(sum),
-            (d / 1000).toFixed(2).replace(".", ","),
-            formatSignedMS(diff)
-          ].join(";"));
-        }
-
-        const csvContent = "\uFEFF" + rows.join("\r\n");
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const now = new Date();
-        const fileName = `tempo_${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}_${pad2(now.getHours())}${pad2(now.getMinutes())}.csv`;
-
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        showToast("Wyeksportowano plik CSV");
-      }
-
-      /* Niestandardowy modal i toast */
-      function openModal(title, text, buttons) {
-        els.modalTitle.textContent = title;
-        els.modalText.textContent = text;
-        els.modalButtons.innerHTML = "";
-
-        buttons.forEach((btnDef) => {
-          const b = document.createElement("button");
-          b.type = "button";
-          b.className = "modal-btn" + (btnDef.className ? ` ${btnDef.className}` : "");
-          b.textContent = btnDef.label;
-          b.addEventListener("click", btnDef.onClick);
-          els.modalButtons.appendChild(b);
-        });
-
-        els.modalBackdrop.classList.add("open");
-      }
-
-      function closeModal() {
-        els.modalBackdrop.classList.remove("open");
-      }
-
-      function showToast(message) {
-        els.toast.textContent = message;
-        els.toast.classList.add("show");
-        if (toastTimer) clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-          els.toast.classList.remove("show");
-        }, 2400);
-      }
-
-      /* Obsługa zdarzeń */
-      els.goalToggleBtn.addEventListener("click", () => {
-        const isOpen = els.goalPanel.classList.toggle("open");
-        els.goalToggleBtn.classList.toggle("active", isOpen);
-        els.goalToggleBtn.setAttribute("aria-expanded", String(isOpen));
-      });
-
-      els.goalCloseBtn.addEventListener("click", () => {
-        els.goalPanel.classList.remove("open");
-        els.goalToggleBtn.classList.remove("active");
-        els.goalToggleBtn.setAttribute("aria-expanded", "false");
-      });
-
-      els.targetMin.addEventListener("input", onTimeGoalChange);
-      els.targetSec.addEventListener("input", onTimeGoalChange);
-      els.targetRate.addEventListener("input", onRateGoalChange);
-
-      els.targetMin.addEventListener("blur", () => syncGoalInputs("all"));
-      els.targetSec.addEventListener("blur", () => syncGoalInputs("all"));
-      els.targetRate.addEventListener("blur", () => syncGoalInputs("all"));
-
-      els.doubleTapGuard.addEventListener("change", () => {
-        state.doubleTapGuard = els.doubleTapGuard.checked;
-        saveState();
-      });
-
-      els.mainBtn.addEventListener("click", handleMainButtonClick);
-
-      els.pauseBtn.addEventListener("click", () => {
-        if (state.status === "running") {
-          pauseTimer();
-        } else if (state.status === "paused") {
-          resumeTimer();
-        }
-      });
-
-      els.undoBtn.addEventListener("click", handleUndoLast);
-      els.finishBtn.addEventListener("click", openFinishModal);
-
-      els.copyListBtn.addEventListener("click", () => {
-        if (state.laps.length === 0) return;
-        const text = buildPlainTextReport(state.laps);
-        copyToClipboard(text, "Skopiowano listę pomiarów do schowka");
-      });
-
-      els.exportCsvBtn.addEventListener("click", exportCsv);
-
-      // Delegacja usuwania pojedynczego pomiaru
-      els.lapList.addEventListener("click", (e) => {
-        const btn = e.target.closest("[data-del-id]");
-        if (!btn) return;
-        const lapId = btn.getAttribute("data-del-id");
-        deleteSingleLap(lapId);
-      });
-
-      // Zwijanie / rozwijanie historii
-      els.historyToggleBtn.addEventListener("click", () => {
-        const isOpen = els.historyBody.classList.toggle("open");
-        els.historyChevron.classList.toggle("open", isOpen);
-        els.historyToggleBtn.setAttribute("aria-expanded", String(isOpen));
-      });
-
-      // Delegacja akcji na elementach historii
-      els.historyBody.addEventListener("click", (e) => {
-        const copyBtn = e.target.closest("[data-hist-copy]");
-        if (copyBtn) {
-          const id = copyBtn.getAttribute("data-hist-copy");
-          const item = state.history.find(h => h.id === id);
-          if (item && Array.isArray(item.laps)) {
-            copyToClipboard(buildPlainTextReport(item.laps), "Skopiowano pomiary z historii");
-          }
-          return;
-        }
-
-        const delBtn = e.target.closest("[data-hist-del]");
-        if (delBtn) {
-          const id = delBtn.getAttribute("data-hist-del");
-          const item = state.history.find(h => h.id === id);
-          if (!item) return;
-          openModal(
-            "Usunąć sesję z historii?",
-            `Sesja z ${item.dateLabel} (${item.count} pozycji) zostanie trwale usunięta.`,
-            [
-              {
-                label: "Usuń sesję",
-                className: "danger",
-                onClick: () => {
-                  state.history = state.history.filter(h => h.id !== id);
-                  saveState();
-                  renderHistory();
-                  closeModal();
-                  showToast("Usunięto sesję z historii");
-                }
-              },
-              {
-                label: "Anuluj",
-                className: "",
-                onClick: closeModal
-              }
-            ]
-          );
-        }
-      });
-
-      // Zamknięcie modala po kliknięciu w tło
-      els.modalBackdrop.addEventListener("click", (e) => {
-        if (e.target === els.modalBackdrop) closeModal();
-      });
-
-      // Natychmiastowa synchronizacja czasu po powrocie z uśpienia telefonu / innej karty
-      document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) {
-          updateLiveDisplay(Date.now());
+        function resumeTimer() {
+          if (state.status !== "paused") return;
+          const nowTs = Date.now();
+          state.currentLapStartTs = nowTs;
+          state.status = "running";
+          triggerVibration(20);
+          saveState();
+          renderAllStatic();
+          updateLiveDisplay(nowTs);
           ensureLoop();
         }
-      });
 
-      /* Inicjalizacja aplikacji przy starcie */
-      syncGoalInputs("all");
-      renderAllStatic();
-      updateLiveDisplay(Date.now());
-      ensureLoop();
-    })();
-  </script>
-</body>
+        function handleUndoLast() {
+          if (state.laps.length === 0) return;
+          const nowTs = Date.now();
+          const removed = state.laps.pop();
+
+          // Przywracamy czas cofniętej pozycji do bieżącego okrążenia, jeśli sesja jest aktywna
+          if (state.status === "running" || state.status === "paused") {
+            state.currentLapAccumulatedMs += removed.durationMs;
+          }
+
+          lockoutUntil = 0;
+          saveState();
+          renderAllStatic();
+          updateLiveDisplay(nowTs);
+          showToast(
+            `Cofnięto pozycję #${state.laps.length + 1} (${formatLapMs(removed.durationMs)})`,
+          );
+        }
+
+        function deleteSingleLap(lapId) {
+          const idx = state.laps.findIndex((l) => l.id === lapId);
+          if (idx === -1) return;
+          const removed = state.laps.splice(idx, 1)[0];
+          saveState();
+          renderAllStatic();
+          updateLiveDisplay(Date.now());
+          showToast(
+            `Usunięto pomiar #${idx + 1} (${formatLapMs(removed.durationMs)})`,
+          );
+        }
+
+        /* Zakończenie i zapisanie sesji do historii */
+        function openFinishModal() {
+          const stats = computeStats();
+          const summary =
+            stats.count > 0
+              ? `Ukończone pozycje: ${stats.count}. Średnia: ${formatLapMs(stats.avgMs)}, tempo: ${formatPlDecimal(stats.ratePerHour, 2)} szt./godz.`
+              : "Nie zaliczono jeszcze żadnej ukończonej pozycji. Możesz wyzerować stoper.";
+
+          const buttons = [];
+          if (stats.count > 0) {
+            buttons.push({
+              label: "Zapisz w historii i wyzeruj",
+              className: "primary",
+              onClick: () => {
+                archiveCurrentSession();
+                resetCurrentSession();
+                closeModal();
+                showToast("Sesja zapisana w historii");
+              },
+            });
+          }
+
+          buttons.push({
+            label: "Wyzeruj bez zapisu",
+            className: "danger",
+            onClick: () => {
+              resetCurrentSession();
+              closeModal();
+              showToast("Sesja została wyzerowana");
+            },
+          });
+
+          buttons.push({
+            label: "Anuluj",
+            className: "",
+            onClick: closeModal,
+          });
+
+          openModal("Zakończyć bieżącą sesję?", summary, buttons);
+        }
+
+        function archiveCurrentSession() {
+          const stats = computeStats();
+          if (stats.count === 0) return;
+
+          const now = new Date();
+          const dateLabel = `${pad2(now.getDate())}.${pad2(now.getMonth() + 1)}.${now.getFullYear()} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
+
+          const record = {
+            id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+            dateLabel,
+            count: stats.count,
+            totalMs: stats.completedTotalMs,
+            avgMs: stats.avgMs,
+            medianMs: stats.medianMs,
+            ratePerHour: stats.ratePerHour,
+            bestMs: stats.bestMs,
+            targetSeconds: state.targetSeconds,
+            laps: state.laps.map((l) => ({ durationMs: l.durationMs })),
+          };
+
+          state.history.unshift(record);
+        }
+
+        function resetCurrentSession() {
+          state.status = "idle";
+          state.laps = [];
+          state.currentLapStartTs = null;
+          state.currentLapAccumulatedMs = 0;
+          state.sessionStartedAt = null;
+          lockoutUntil = 0;
+          saveState();
+          renderAllStatic();
+          updateLiveDisplay(Date.now());
+        }
+
+        /* Eksport i kopiowanie listy */
+        function buildPlainTextReport(laps) {
+          let sum = 0;
+          const lines = [];
+          for (let i = 0; i < laps.length; i++) {
+            sum += laps[i].durationMs;
+            const nr = String(i + 1).padStart(3, " ");
+            const lapStr = formatHMSCs(laps[i].durationMs);
+            const cumStr = formatHMSCs(sum);
+            lines.push(`${nr}   ${lapStr}   ${cumStr}`);
+          }
+          return lines.join("\n");
+        }
+
+        function copyToClipboard(text, successMsg) {
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.top = "-9999px";
+            ta.style.left = "-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            ta.setSelectionRange(0, text.length);
+            const ok = document.execCommand("copy");
+            document.body.removeChild(ta);
+            if (ok) {
+              showToast(successMsg);
+            } else {
+              showToast("Nie udało się skopiować do schowka");
+            }
+          } catch (err) {
+            showToast("Brak dostępu do schowka");
+          }
+        }
+
+        function exportCsv() {
+          if (state.laps.length === 0) return;
+          const targetMs = state.targetSeconds * 1000;
+          const rows = [
+            "Nr;Czas pozycji;Czas laczny;Sekundy;Bilans wzgledem progu",
+          ];
+          let sum = 0;
+
+          for (let i = 0; i < state.laps.length; i++) {
+            const d = state.laps[i].durationMs;
+            sum += d;
+            const diff = targetMs - d;
+            rows.push(
+              [
+                i + 1,
+                formatHMSCs(d),
+                formatHMSCs(sum),
+                (d / 1000).toFixed(2).replace(".", ","),
+                formatSignedMS(diff),
+              ].join(";"),
+            );
+          }
+
+          const csvContent = "\uFEFF" + rows.join("\r\n");
+          const blob = new Blob([csvContent], {
+            type: "text/csv;charset=utf-8;",
+          });
+          const url = URL.createObjectURL(blob);
+          const now = new Date();
+          const fileName = `tempo_${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}_${pad2(now.getHours())}${pad2(now.getMinutes())}.csv`;
+
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          showToast("Wyeksportowano plik CSV");
+        }
+
+        /* Niestandardowy modal i toast */
+        function openModal(title, text, buttons) {
+          els.modalTitle.textContent = title;
+          els.modalText.textContent = text;
+          els.modalButtons.innerHTML = "";
+
+          buttons.forEach((btnDef) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className =
+              "modal-btn" + (btnDef.className ? ` ${btnDef.className}` : "");
+            b.textContent = btnDef.label;
+            b.addEventListener("click", btnDef.onClick);
+            els.modalButtons.appendChild(b);
+          });
+
+          els.modalBackdrop.classList.add("open");
+        }
+
+        function closeModal() {
+          els.modalBackdrop.classList.remove("open");
+        }
+
+        function showToast(message) {
+          els.toast.textContent = message;
+          els.toast.classList.add("show");
+          if (toastTimer) clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => {
+            els.toast.classList.remove("show");
+          }, 2400);
+        }
+
+        /* Obsługa zdarzeń */
+        els.goalToggleBtn.addEventListener("click", () => {
+          const isOpen = els.goalPanel.classList.toggle("open");
+          els.goalToggleBtn.classList.toggle("active", isOpen);
+          els.goalToggleBtn.setAttribute("aria-expanded", String(isOpen));
+        });
+
+        els.goalCloseBtn.addEventListener("click", () => {
+          els.goalPanel.classList.remove("open");
+          els.goalToggleBtn.classList.remove("active");
+          els.goalToggleBtn.setAttribute("aria-expanded", "false");
+        });
+
+        els.targetMin.addEventListener("input", onTimeGoalChange);
+        els.targetSec.addEventListener("input", onTimeGoalChange);
+        els.targetRate.addEventListener("input", onRateGoalChange);
+
+        els.targetMin.addEventListener("blur", () => syncGoalInputs("all"));
+        els.targetSec.addEventListener("blur", () => syncGoalInputs("all"));
+        els.targetRate.addEventListener("blur", () => syncGoalInputs("all"));
+
+        els.doubleTapGuard.addEventListener("change", () => {
+          state.doubleTapGuard = els.doubleTapGuard.checked;
+          saveState();
+        });
+
+        els.mainBtn.addEventListener("click", handleMainButtonClick);
+
+        els.pauseBtn.addEventListener("click", () => {
+          if (state.status === "running") {
+            pauseTimer();
+          } else if (state.status === "paused") {
+            resumeTimer();
+          }
+        });
+
+        els.undoBtn.addEventListener("click", handleUndoLast);
+        els.finishBtn.addEventListener("click", openFinishModal);
+
+        els.copyListBtn.addEventListener("click", () => {
+          if (state.laps.length === 0) return;
+          const text = buildPlainTextReport(state.laps);
+          copyToClipboard(text, "Skopiowano listę pomiarów do schowka");
+        });
+
+        els.exportCsvBtn.addEventListener("click", exportCsv);
+
+        // Delegacja usuwania pojedynczego pomiaru
+        els.lapList.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-del-id]");
+          if (!btn) return;
+          const lapId = btn.getAttribute("data-del-id");
+          deleteSingleLap(lapId);
+        });
+
+        // Zwijanie / rozwijanie historii
+        els.historyToggleBtn.addEventListener("click", () => {
+          const isOpen = els.historyBody.classList.toggle("open");
+          els.historyChevron.classList.toggle("open", isOpen);
+          els.historyToggleBtn.setAttribute("aria-expanded", String(isOpen));
+        });
+
+        // Delegacja akcji na elementach historii
+        els.historyBody.addEventListener("click", (e) => {
+          const copyBtn = e.target.closest("[data-hist-copy]");
+          if (copyBtn) {
+            const id = copyBtn.getAttribute("data-hist-copy");
+            const item = state.history.find((h) => h.id === id);
+            if (item && Array.isArray(item.laps)) {
+              copyToClipboard(
+                buildPlainTextReport(item.laps),
+                "Skopiowano pomiary z historii",
+              );
+            }
+            return;
+          }
+
+          const delBtn = e.target.closest("[data-hist-del]");
+          if (delBtn) {
+            const id = delBtn.getAttribute("data-hist-del");
+            const item = state.history.find((h) => h.id === id);
+            if (!item) return;
+            openModal(
+              "Usunąć sesję z historii?",
+              `Sesja z ${item.dateLabel} (${item.count} pozycji) zostanie trwale usunięta.`,
+              [
+                {
+                  label: "Usuń sesję",
+                  className: "danger",
+                  onClick: () => {
+                    state.history = state.history.filter((h) => h.id !== id);
+                    saveState();
+                    renderHistory();
+                    closeModal();
+                    showToast("Usunięto sesję z historii");
+                  },
+                },
+                {
+                  label: "Anuluj",
+                  className: "",
+                  onClick: closeModal,
+                },
+              ],
+            );
+          }
+        });
+
+        // Zamknięcie modala po kliknięciu w tło
+        els.modalBackdrop.addEventListener("click", (e) => {
+          if (e.target === els.modalBackdrop) closeModal();
+        });
+
+        // Natychmiastowa synchronizacja czasu po powrocie z uśpienia telefonu / innej karty
+        document.addEventListener("visibilitychange", () => {
+          if (!document.hidden) {
+            updateLiveDisplay(Date.now());
+            ensureLoop();
+          }
+        });
+
+        /* Inicjalizacja aplikacji przy starcie */
+        syncGoalInputs("all");
+        renderAllStatic();
+        updateLiveDisplay(Date.now());
+        ensureLoop();
+      })();
+    </script>
+  </body>
 </html>
