@@ -2,14 +2,14 @@
 <html lang="pl">
   <head>
     <link rel="manifest" href="./manifest.json" />
-    <meta name="theme-color" content="#0b0e14" />
+    <meta name="theme-color" content="#0e1014" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#0e1014" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
@@ -36,6 +36,9 @@
         --blue: #3b82f6;
         --blue-bg: rgba(59, 130, 246, 0.14);
         --blue-border: rgba(59, 130, 246, 0.4);
+        --flow: #818cf8;
+        --flow-bg: rgba(129, 140, 248, 0.14);
+        --flow-border: rgba(129, 140, 248, 0.38);
         --radius: 14px;
         --radius-sm: 10px;
       }
@@ -83,8 +86,16 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
+        flex-wrap: wrap;
+        gap: 8px 10px;
         padding: 4px 2px;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
       }
 
       .brand {
@@ -115,9 +126,62 @@
         box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
       }
 
+      .status-dot.running.slow-flow {
+        background: var(--flow);
+        box-shadow: 0 0 10px rgba(129, 140, 248, 0.7);
+      }
+
       .status-dot.paused {
         background: #f59e0b;
         box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+      }
+
+      .status-dot.paused.slow-flow {
+        background: #94a3b8;
+        box-shadow: 0 0 8px rgba(148, 163, 184, 0.45);
+      }
+
+      .flow-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        padding: 8px 11px;
+        border-radius: var(--radius-sm);
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition:
+          border-color 0.15s,
+          background 0.15s,
+          color 0.15s;
+      }
+
+      .flow-toggle-btn:hover {
+        border-color: var(--flow-border);
+        color: var(--text);
+        background: var(--card-elevated);
+      }
+
+      .flow-toggle-btn.active {
+        border-color: var(--flow-border);
+        background: var(--flow-bg);
+        color: #c7d2fe;
+      }
+
+      .flow-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--text-dim);
+        transition: background 0.15s;
+      }
+
+      .flow-toggle-btn.active .flow-dot {
+        background: var(--flow);
       }
 
       .goal-toggle-btn {
@@ -147,6 +211,21 @@
       .goal-pill-label {
         color: var(--text-muted);
         font-weight: 500;
+      }
+
+      .slow-flow-panel-note {
+        font-size: 0.84rem;
+        color: #c7d2fe;
+        background: var(--flow-bg);
+        border: 1px solid var(--flow-border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        line-height: 1.45;
+      }
+
+      .slow-flow-panel-note[hidden],
+      .goal-grid[hidden] {
+        display: none;
       }
 
       /* Panel ustawień progu docelowego */
@@ -224,10 +303,21 @@
         color: var(--text);
         font-size: 1rem;
         font-weight: 600;
-        padding: 9px 10px;
+        padding: 9px 8px;
         text-align: center;
         outline: none;
         transition: border-color 0.15s;
+      }
+
+      .input-box[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+
+      .input-box[type="number"]::-webkit-inner-spin-button,
+      .input-box[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
 
       .input-box:focus {
@@ -323,6 +413,28 @@
           rgba(239, 68, 68, 0.08) 0%,
           var(--card) 100%
         );
+      }
+
+      .balance-card.slow-flow {
+        border-color: var(--flow-border);
+        background: linear-gradient(
+          180deg,
+          rgba(129, 140, 248, 0.09) 0%,
+          var(--card) 100%
+        );
+      }
+
+      .balance-card.slow-flow .balance-tag {
+        color: #a5b4fc;
+      }
+
+      .balance-card.slow-flow .balance-value {
+        font-size: clamp(1.7rem, 6.2vw, 2.15rem);
+        color: #e2e8f0;
+      }
+
+      .balance-card.slow-flow .current-lap-bar-wrap {
+        display: none;
       }
 
       .balance-top {
@@ -472,6 +584,21 @@
         background: linear-gradient(180deg, #92400e 0%, #78350f 100%);
       }
 
+      .main-btn.slow-flow-active {
+        border-color: #6366f1;
+        background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%);
+      }
+
+      .main-btn.slow-flow-active.running {
+        border-color: #818cf8;
+        background: linear-gradient(180deg, #3730a3 0%, #2e1065 100%);
+      }
+
+      .main-btn.slow-flow-active.paused {
+        border-color: #64748b;
+        background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+      }
+
       .main-btn.locked {
         opacity: 0.72;
         cursor: wait;
@@ -486,10 +613,11 @@
       }
 
       .main-btn-timer {
-        font-size: 2.55rem;
+        font-size: clamp(1.85rem, 8.5vw, 2.55rem);
         font-weight: 800;
         letter-spacing: -0.02em;
         line-height: 1.05;
+        white-space: nowrap;
       }
 
       .main-btn-action {
@@ -685,7 +813,7 @@
 
       .lap-table-head {
         display: grid;
-        grid-template-columns: 36px 1fr 1fr 68px 30px;
+        grid-template-columns: minmax(36px, auto) minmax(0, 1fr) minmax(0, 1fr) minmax(60px, auto) 30px;
         gap: 6px;
         padding: 0 4px 8px;
         border-bottom: 1px solid var(--border);
@@ -709,12 +837,21 @@
 
       .lap-row {
         display: grid;
-        grid-template-columns: 36px 1fr 1fr 68px 30px;
+        grid-template-columns: minmax(36px, auto) minmax(0, 1fr) minmax(0, 1fr) minmax(60px, auto) 30px;
         gap: 6px;
         align-items: center;
         padding: 9px 4px;
         border-bottom: 1px solid rgba(38, 43, 54, 0.55);
         font-size: 0.86rem;
+      }
+
+      .lap-section.slow-flow .lap-table-head,
+      .lap-section.slow-flow .lap-row {
+        grid-template-columns: minmax(36px, auto) minmax(0, 1fr) minmax(0, 1fr) 30px;
+      }
+
+      .lap-section.slow-flow .lap-col-diff {
+        display: none;
       }
 
       .lap-row:last-child {
@@ -860,9 +997,29 @@
         color: var(--text);
       }
 
+      .history-date-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        min-width: 0;
+      }
+
+      .history-mode-badge {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #c7d2fe;
+        background: var(--flow-bg);
+        border: 1px solid var(--flow-border);
+        border-radius: 999px;
+        padding: 2px 7px;
+      }
+
       .history-item-stats {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 6px;
       }
 
@@ -870,6 +1027,35 @@
         display: flex;
         flex-direction: column;
         gap: 2px;
+        min-width: 0;
+      }
+
+      @media (max-width: 380px) {
+        .lap-table-head,
+        .lap-row {
+          gap: 4px;
+          font-size: 0.8rem;
+        }
+
+        .lap-cum {
+          font-size: 0.76rem;
+        }
+
+        .history-item-stats {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+      }
+
+      @media (max-width: 350px) {
+        .goal-grid {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+
+        .goal-divider {
+          padding-bottom: 0;
+        }
       }
 
       .h-stat-k {
@@ -930,6 +1116,20 @@
         font-size: 0.88rem;
         color: var(--text-muted);
         line-height: 1.5;
+      }
+
+      .modal-note {
+        font-size: 0.82rem;
+        color: #fbbf24;
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 9px;
+        padding: 9px 11px;
+        line-height: 1.45;
+      }
+
+      .modal-note[hidden] {
+        display: none;
       }
 
       .modal-buttons {
@@ -995,7 +1195,9 @@
     <script>
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js", { scope: "./" });
+          navigator.serviceWorker
+            .register("./sw.js", { scope: "./" })
+            .catch(() => {});
         });
       }
     </script>
@@ -1008,15 +1210,26 @@
           <span id="statusDot" class="status-dot" aria-hidden="true"></span>
           <h1 class="brand-title">TEMPO</h1>
         </div>
-        <button
-          id="goalToggleBtn"
-          class="goal-toggle-btn tabular"
-          type="button"
-          aria-expanded="false"
-        >
-          <span class="goal-pill-label">Cel:</span>
-          <span id="goalSummaryText">06:00 | 10,0/h</span>
-        </button>
+        <div class="header-actions">
+          <button
+            id="slowFlowBtn"
+            class="flow-toggle-btn"
+            type="button"
+            aria-pressed="false"
+          >
+            <span class="flow-dot" aria-hidden="true"></span>
+            <span>Slow Flow</span>
+          </button>
+          <button
+            id="goalToggleBtn"
+            class="goal-toggle-btn tabular"
+            type="button"
+            aria-expanded="false"
+          >
+            <span id="goalPillLabel" class="goal-pill-label">Cel:</span>
+            <span id="goalSummaryText">06:00 | 10,0/h</span>
+          </button>
+        </div>
       </header>
 
       <!-- Panel konfiguracji progu docelowego -->
@@ -1026,12 +1239,16 @@
         aria-label="Ustawienia progu docelowego"
       >
         <div class="panel-header">
-          <span class="panel-title">Próg docelowy</span>
+          <span id="goalPanelTitle" class="panel-title">Próg docelowy</span>
           <button id="goalCloseBtn" class="mini-btn" type="button">
             Gotowe
           </button>
         </div>
-        <div class="goal-grid">
+        <div id="slowFlowPanelNote" class="slow-flow-panel-note" hidden>
+          Tryb Slow Flow jest aktywny — pomiar działa bez progu docelowego i
+          bez oceny tempa, ale wszystkie statystyki są zapisywane.
+        </div>
+        <div id="goalGrid" class="goal-grid">
           <div class="field-group">
             <label class="field-label" for="targetMin"
               >Czas na 1 pozycję (MM:SS)</label
@@ -1068,10 +1285,7 @@
             <input
               id="targetRate"
               class="input-box tabular"
-              type="number"
-              min="0.1"
-              max="360"
-              step="0.1"
+              type="text"
               inputmode="decimal"
               aria-label="Wydajność na godzinę"
             />
@@ -1171,7 +1385,7 @@
       <!-- 5. Minimalistyczny wykres w czystym SVG -->
       <section class="card chart-card" aria-label="Wykres czasów pozycji">
         <div class="chart-meta">
-          <span class="panel-title">Czasy pozycji względem progu</span>
+          <span id="chartTitle" class="panel-title">Czasy pozycji względem progu</span>
           <span id="chartHoverInfo" class="chart-hover-info tabular"></span>
         </div>
         <div id="chartBox" class="chart-box">
@@ -1182,7 +1396,11 @@
       </section>
 
       <!-- 6. Lista pomiarów i eksport -->
-      <section class="card" aria-label="Lista zapisanych pomiarów">
+      <section
+        id="lapSection"
+        class="card lap-section"
+        aria-label="Lista zapisanych pomiarów"
+      >
         <div class="section-header">
           <span class="panel-title">Pomiary w sesji</span>
           <div class="export-actions">
@@ -1198,7 +1416,7 @@
           <span>Nr</span>
           <span>Czas</span>
           <span>Łącznie</span>
-          <span>Bilans</span>
+          <span class="lap-col-diff">Bilans</span>
           <span></span>
         </div>
         <div id="lapList" class="lap-list">
@@ -1237,6 +1455,7 @@
       <div class="modal-box">
         <h2 id="modalTitle" class="modal-title">Potwierdzenie</h2>
         <p id="modalText" class="modal-text"></p>
+        <p id="modalNote" class="modal-note" hidden></p>
         <div id="modalButtons" class="modal-buttons"></div>
       </div>
     </div>
@@ -1259,9 +1478,9 @@
             laps: [], // [{ id: string, durationMs: number }]
             currentLapStartTs: null,
             currentLapAccumulatedMs: 0,
-            sessionStartedAt: null,
             targetSeconds: 360, // domyślnie 06:00 (10.0 / godz.)
             doubleTapGuard: true,
+            slowFlow: false,
             history: [],
           };
         }
@@ -1270,13 +1489,20 @@
         let rafId = null;
         let lockoutUntil = 0;
         let toastTimer = null;
+        let storageWarningShown = false;
+        let chartResizeTimer = null;
 
         /* Referencje do elementów DOM */
         const els = {
           statusDot: document.getElementById("statusDot"),
+          slowFlowBtn: document.getElementById("slowFlowBtn"),
           goalToggleBtn: document.getElementById("goalToggleBtn"),
+          goalPillLabel: document.getElementById("goalPillLabel"),
           goalSummaryText: document.getElementById("goalSummaryText"),
           goalPanel: document.getElementById("goalPanel"),
+          goalPanelTitle: document.getElementById("goalPanelTitle"),
+          slowFlowPanelNote: document.getElementById("slowFlowPanelNote"),
+          goalGrid: document.getElementById("goalGrid"),
           goalCloseBtn: document.getElementById("goalCloseBtn"),
           targetMin: document.getElementById("targetMin"),
           targetSec: document.getElementById("targetSec"),
@@ -1309,10 +1535,12 @@
           statBest: document.getElementById("statBest"),
 
           chartBox: document.getElementById("chartBox"),
+          chartTitle: document.getElementById("chartTitle"),
           chartHoverInfo: document.getElementById("chartHoverInfo"),
 
           copyListBtn: document.getElementById("copyListBtn"),
           exportCsvBtn: document.getElementById("exportCsvBtn"),
+          lapSection: document.getElementById("lapSection"),
           lapList: document.getElementById("lapList"),
 
           historyToggleBtn: document.getElementById("historyToggleBtn"),
@@ -1323,51 +1551,120 @@
           modalBackdrop: document.getElementById("modalBackdrop"),
           modalTitle: document.getElementById("modalTitle"),
           modalText: document.getElementById("modalText"),
+          modalNote: document.getElementById("modalNote"),
           modalButtons: document.getElementById("modalButtons"),
           toast: document.getElementById("toast"),
         };
 
         /* Bezpieczny odczyt i zapis localStorage */
+        function sanitizeHistoryItem(item) {
+          if (!item || typeof item !== "object") return null;
+          if (typeof item.id !== "string" || !item.id) return null;
+          if (typeof item.dateLabel !== "string") return null;
+          if (
+            typeof item.count !== "number" ||
+            !Number.isFinite(item.count) ||
+            item.count <= 0
+          ) {
+            return null;
+          }
+          if (
+            typeof item.totalMs !== "number" ||
+            !Number.isFinite(item.totalMs) ||
+            item.totalMs < 0
+          ) {
+            return null;
+          }
+          if (
+            typeof item.avgMs !== "number" ||
+            !Number.isFinite(item.avgMs) ||
+            item.avgMs < 0
+          ) {
+            return null;
+          }
+          if (
+            typeof item.ratePerHour !== "number" ||
+            !Number.isFinite(item.ratePerHour) ||
+            item.ratePerHour < 0
+          ) {
+            return null;
+          }
+          if (
+            typeof item.targetSeconds !== "number" ||
+            !Number.isFinite(item.targetSeconds) ||
+            item.targetSeconds < 10
+          ) {
+            return null;
+          }
+          if (!Array.isArray(item.laps)) return null;
+          const validLaps = item.laps.filter(
+            (l) =>
+              l &&
+              typeof l.durationMs === "number" &&
+              Number.isFinite(l.durationMs) &&
+              l.durationMs >= 0,
+          );
+          if (validLaps.length === 0) return null;
+          return {
+            ...item,
+            mode: item.mode === "slowflow" ? "slowflow" : "target",
+            laps: validLaps,
+          };
+        }
+
         function loadState() {
           const fallback = createDefaultState();
           try {
             const raw = window.localStorage.getItem(STORAGE_KEY);
             if (!raw) return fallback;
             const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== "object") return fallback;
+
+            let status = ["idle", "running", "paused"].includes(parsed.status)
+              ? parsed.status
+              : "idle";
+            const currentLapStartTs =
+              typeof parsed.currentLapStartTs === "number" &&
+              Number.isFinite(parsed.currentLapStartTs)
+                ? parsed.currentLapStartTs
+                : null;
+            if (status === "running" && currentLapStartTs === null) {
+              status = "paused";
+            }
+
             return {
-              status: ["idle", "running", "paused"].includes(parsed.status)
-                ? parsed.status
-                : "idle",
+              status,
               laps: Array.isArray(parsed.laps)
                 ? parsed.laps.filter(
                     (l) =>
                       l &&
+                      typeof l.id === "string" &&
+                      l.id.length > 0 &&
                       typeof l.durationMs === "number" &&
+                      Number.isFinite(l.durationMs) &&
                       l.durationMs >= 0,
                   )
                 : [],
-              currentLapStartTs:
-                typeof parsed.currentLapStartTs === "number"
-                  ? parsed.currentLapStartTs
-                  : null,
+              currentLapStartTs,
               currentLapAccumulatedMs:
-                typeof parsed.currentLapAccumulatedMs === "number"
+                typeof parsed.currentLapAccumulatedMs === "number" &&
+                Number.isFinite(parsed.currentLapAccumulatedMs)
                   ? Math.max(0, parsed.currentLapAccumulatedMs)
                   : 0,
-              sessionStartedAt:
-                typeof parsed.sessionStartedAt === "string"
-                  ? parsed.sessionStartedAt
-                  : null,
               targetSeconds:
                 typeof parsed.targetSeconds === "number" &&
-                parsed.targetSeconds >= 10
-                  ? parsed.targetSeconds
+                Number.isFinite(parsed.targetSeconds)
+                  ? Math.max(10, Math.min(35999, Math.round(parsed.targetSeconds)))
                   : 360,
               doubleTapGuard:
                 typeof parsed.doubleTapGuard === "boolean"
                   ? parsed.doubleTapGuard
                   : true,
-              history: Array.isArray(parsed.history) ? parsed.history : [],
+              slowFlow:
+                typeof parsed.slowFlow === "boolean" ? parsed.slowFlow : false,
+              history: Array.isArray(parsed.history)
+                ? parsed.history.map(sanitizeHistoryItem).filter(Boolean)
+                : [],
             };
           } catch (err) {
             return fallback;
@@ -1377,8 +1674,14 @@
         function saveState() {
           try {
             window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            storageWarningShown = false;
           } catch (err) {
-            /* Ignoruj błąd przepełnienia lub blokady storage */
+            if (!storageWarningShown) {
+              storageWarningShown = true;
+              showToast(
+                "Brak miejsca lub dostępu do pamięci przeglądarki — dane nie zostały zapisane",
+              );
+            }
           }
         }
 
@@ -1400,6 +1703,18 @@
             return `${pad2(hrs)}:${pad2(min)}:${pad2(sec)}.${pad2(cs)}`;
           }
           return `${pad2(totalMin)}:${pad2(sec)}.${pad2(cs)}`;
+        }
+
+        function formatLapWholeSec(ms) {
+          const safe = Math.max(0, ms);
+          const totalSec = Math.floor(safe / 1000);
+          const sec = totalSec % 60;
+          const min = Math.floor(totalSec / 60) % 60;
+          const hrs = Math.floor(totalSec / 3600);
+          if (hrs > 0) {
+            return `${pad2(hrs)}:${pad2(min)}:${pad2(sec)}`;
+          }
+          return `${pad2(min)}:${pad2(sec)}`;
         }
 
         function formatHMSCs(ms) {
@@ -1434,8 +1749,11 @@
         }
 
         function formatSignedMS(ms) {
-          const sign = ms >= 0 ? "+" : "-";
           const absSec = Math.round(Math.abs(ms) / 1000);
+          if (absSec === 0) {
+            return "00:00";
+          }
+          const sign = ms > 0 ? "+" : "-";
           return sign + formatShortMS(absSec);
         }
 
@@ -1516,31 +1834,50 @@
             els.targetSec.value = String(secs);
           }
           if (source !== "rate") {
-            els.targetRate.value = rate.toFixed(1);
+            els.targetRate.value = formatPlDecimal(rate, 1);
           }
 
-          els.goalSummaryText.textContent = `${formatShortMS(totalSec)} | ${formatPlDecimal(rate, 1)}/h`;
+          els.goalPillLabel.hidden = state.slowFlow;
+          els.goalSummaryText.textContent = state.slowFlow
+            ? "Opcje"
+            : `${formatShortMS(totalSec)} | ${formatPlDecimal(rate, 1)}/h`;
           els.doubleTapGuard.checked = state.doubleTapGuard;
         }
 
-        function onTimeGoalChange() {
-          let m = parseInt(els.targetMin.value, 10);
-          let s = parseInt(els.targetSec.value, 10);
+        function applyTimeGoal(commit) {
+          const rawMin = els.targetMin.value.trim();
+          const rawSec = els.targetSec.value.trim();
+          if (!commit && rawMin === "" && rawSec === "") return;
+
+          let m = parseInt(rawMin, 10);
+          let s = parseInt(rawSec, 10);
           if (isNaN(m) || m < 0) m = 0;
           if (isNaN(s) || s < 0) s = 0;
           if (s > 59) s = 59;
-          const combined = Math.max(10, Math.min(35999, m * 60 + s));
+
+          const rawTotal = m * 60 + s;
+          if (!commit && rawTotal < 10) return;
+
+          const combined = Math.max(10, Math.min(35999, rawTotal));
           state.targetSeconds = combined;
           saveState();
-          syncGoalInputs("time");
+          syncGoalInputs(commit ? "all" : "time");
           renderAllStatic();
           updateLiveDisplay(Date.now());
         }
 
+        function onTimeGoalChange() {
+          applyTimeGoal(false);
+        }
+
+        function commitTimeGoal() {
+          applyTimeGoal(true);
+        }
+
         function onRateGoalChange() {
-          const val = parseFloat(
-            String(els.targetRate.value).replace(",", "."),
-          );
+          const raw = String(els.targetRate.value).trim().replace(",", ".");
+          if (!raw) return;
+          const val = parseFloat(raw);
           if (isNaN(val) || val <= 0) return;
           const clampedRate = Math.max(0.1, Math.min(360, val));
           state.targetSeconds = Math.max(
@@ -1573,24 +1910,38 @@
             els.cooldownBar.style.width = "0%";
           }
 
-          els.mainBtn.classList.remove("running", "paused", "over-target");
+          els.mainBtn.classList.remove(
+            "running",
+            "paused",
+            "over-target",
+            "slow-flow-active",
+          );
+          els.mainBtn.classList.toggle("slow-flow-active", state.slowFlow);
+
+          const formatMainTimer = state.slowFlow
+            ? formatLapWholeSec
+            : formatLapMs;
 
           if (state.status === "idle") {
-            els.mainBtnTop.textContent = "Gotowy do startu";
-            els.mainBtnTimer.textContent = "00:00.00";
+            els.mainBtnTop.textContent = state.slowFlow
+              ? "Tryb Slow Flow — gotowy"
+              : "Gotowy do startu";
+            els.mainBtnTimer.textContent = state.slowFlow
+              ? "00:00"
+              : "00:00.00";
             els.mainBtnAction.textContent = "START";
           } else if (state.status === "running") {
             els.mainBtn.classList.add("running");
-            if (currentLapMs > targetMs) {
+            if (!state.slowFlow && currentLapMs > targetMs) {
               els.mainBtn.classList.add("over-target");
             }
             els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1}`;
-            els.mainBtnTimer.textContent = formatLapMs(currentLapMs);
+            els.mainBtnTimer.textContent = formatMainTimer(currentLapMs);
             els.mainBtnAction.textContent = "ZALICZ POZYCJĘ";
           } else if (state.status === "paused") {
             els.mainBtn.classList.add("paused");
             els.mainBtnTop.textContent = `Wstrzymano — Pozycja #${state.laps.length + 1}`;
-            els.mainBtnTimer.textContent = formatLapMs(currentLapMs);
+            els.mainBtnTimer.textContent = formatMainTimer(currentLapMs);
             els.mainBtnAction.textContent = "WZNÓW POMIAR";
           }
 
@@ -1599,6 +1950,11 @@
             stats.completedTotalMs +
             (state.status === "idle" ? 0 : currentLapMs);
           els.statTotal.textContent = formatHMS(liveSessionTotalMs);
+
+          if (state.slowFlow) {
+            els.balanceValue.textContent = formatHMS(liveSessionTotalMs);
+            return;
+          }
 
           // Wskaźnik bieżącego okrążenia względem progu
           if (state.status === "idle") {
@@ -1650,13 +2006,37 @@
           const stats = computeStats();
           const targetMs = state.targetSeconds * 1000;
 
+          // Tryb Slow Flow / cel
+          els.slowFlowBtn.classList.toggle("active", state.slowFlow);
+          els.slowFlowBtn.setAttribute("aria-pressed", String(state.slowFlow));
+          els.goalPanelTitle.textContent = state.slowFlow
+            ? "Ustawienia"
+            : "Próg docelowy";
+          els.goalGrid.hidden = state.slowFlow;
+          els.slowFlowPanelNote.hidden = !state.slowFlow;
+          els.chartTitle.textContent = state.slowFlow
+            ? "Czasy pozycji w sesji"
+            : "Czasy pozycji względem progu";
+          els.lapSection.classList.toggle("slow-flow", state.slowFlow);
+          syncGoalInputs("all");
+
           // Kropka statusu
           els.statusDot.className =
-            "status-dot" + (state.status !== "idle" ? ` ${state.status}` : "");
+            "status-dot" +
+            (state.status !== "idle" ? ` ${state.status}` : "") +
+            (state.slowFlow ? " slow-flow" : "");
 
-          // Bilans sesji
-          els.balanceCard.classList.remove("ahead", "behind");
-          if (stats.count === 0) {
+          // Bilans sesji / widok Slow Flow
+          els.balanceCard.classList.remove("ahead", "behind", "slow-flow");
+          if (state.slowFlow) {
+            els.balanceCard.classList.add("slow-flow");
+            els.balanceTag.textContent = "TRYB SLOW FLOW";
+            els.balanceSub.textContent =
+              stats.count === 0
+                ? "Praca własnym tempem · bez progu"
+                : `Praca na luzie · ukończono pozycji: ${stats.count}`;
+            els.balanceValue.textContent = formatHMS(stats.completedTotalMs);
+          } else if (stats.count === 0) {
             els.balanceTag.textContent = "Bilans sesji";
             els.balanceSub.textContent = "Zostanie obliczony po 1. pozycji";
             els.balanceValue.textContent = "00:00";
@@ -1687,7 +2067,11 @@
           els.statAvg.className = "stat-value tabular";
           if (stats.count > 0) {
             els.statAvg.textContent = formatLapMs(stats.avgMs);
-            els.statAvg.classList.add(stats.avgMs <= targetMs ? "good" : "bad");
+            if (!state.slowFlow) {
+              els.statAvg.classList.add(
+                stats.avgMs <= targetMs ? "good" : "bad",
+              );
+            }
             els.statMedian.textContent = formatLapMs(stats.medianMs);
             els.statRate.textContent = `${formatPlDecimal(stats.ratePerHour, 2)} / h`;
             els.statBest.textContent = formatLapMs(stats.bestMs);
@@ -1698,7 +2082,7 @@
             els.statBest.textContent = "--:--.--";
           }
 
-          renderSvgChart(stats);
+          renderSvgChart();
           renderLapList();
           renderHistory();
         }
@@ -1719,13 +2103,19 @@
             return;
           }
 
+          const isFlow = state.slowFlow;
           const targetMs = state.targetSeconds * 1000;
           const maxLapMs = Math.max(...laps.map((l) => l.durationMs));
-          const maxScaleMs = Math.max(targetMs * 1.25, maxLapMs * 1.1, 60000);
+          const maxScaleMs = isFlow
+            ? Math.max(maxLapMs * 1.15, 60000)
+            : Math.max(targetMs * 1.25, maxLapMs * 1.1, 60000);
 
-          const vbW = 480;
-          const vbH = 150;
-          const padLeft = 40;
+          const measuredW = Math.round(els.chartBox.clientWidth || 0);
+          const vbW = measuredW >= 200 ? measuredW : 480;
+          const vbH = 155;
+          const needsHours =
+            (!isFlow && state.targetSeconds >= 3600) || maxScaleMs >= 3600000;
+          const padLeft = needsHours ? 56 : 42;
           const padRight = 10;
           const padTop = 12;
           const padBottom = 20;
@@ -1738,17 +2128,26 @@
           const count = laps.length;
           const step = plotW / count;
           const gap = count > 35 ? 1.5 : count > 15 ? 3 : 5;
-          const barW = Math.max(3, Math.min(34, step - gap));
+          const barW =
+            step <= 2.5
+              ? Math.max(1, step * 0.8)
+              : Math.max(1.5, Math.min(34, step - gap));
 
           let barsHtml = "";
+          let hitsHtml = "";
           for (let i = 0; i < count; i++) {
             const lap = laps[i];
             const barH = Math.max(2, (lap.durationMs / maxScaleMs) * plotH);
             const x = padLeft + i * step + (step - barW) / 2;
             const y = padTop + plotH - barH;
-            const fill = lap.durationMs <= targetMs ? "#22c55e" : "#ef4444";
+            const fill = isFlow
+              ? "#818cf8"
+              : lap.durationMs <= targetMs
+                ? "#22c55e"
+                : "#ef4444";
             const radius = barW > 8 ? 3 : 1.5;
-            barsHtml += `<rect class="svg-bar" data-idx="${i}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="${radius}" fill="${fill}" opacity="0.9" style="cursor:pointer"></rect>`;
+            barsHtml += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="${radius}" fill="${fill}" opacity="0.9"></rect>`;
+            hitsHtml += `<rect class="svg-hit" data-idx="${i}" x="${(padLeft + i * step).toFixed(1)}" y="${padTop}" width="${step.toFixed(1)}" height="${plotH}" fill="transparent" style="cursor:pointer"></rect>`;
           }
 
           // Etykiety osi X (pierwszy, środkowy, ostatni)
@@ -1761,42 +2160,58 @@
             xLabelsHtml += `<text x="${padLeft + (count - 1) * step + step / 2}" y="${vbH - 4}" fill="#64748b" font-size="10" text-anchor="middle">${count}</text>`;
           }
 
+          // Ukrywamy skrajne etykiety osi Y, jeśli nachodzą na etykietę progu docelowego
+          const showTopLabel = isFlow || Math.abs(targetY - padTop) >= 12;
+          const showBottomLabel =
+            isFlow || Math.abs(targetY - (padTop + plotH)) >= 12;
+
+          const targetOverlayHtml = isFlow
+            ? ""
+            : `<!-- Przerywana linia progu docelowego -->
+            <line x1="${padLeft}" y1="${targetY.toFixed(1)}" x2="${vbW - padRight}" y2="${targetY.toFixed(1)}" stroke="#3b82f6" stroke-width="1.6" stroke-dasharray="5 4" />
+            <text x="${padLeft - 6}" y="${(targetY + 3).toFixed(1)}" fill="#3b82f6" font-size="10" font-weight="700" text-anchor="end">${formatShortMS(state.targetSeconds)}</text>`;
+
           const svgHtml = `
-          <svg viewBox="0 0 ${vbW} ${vbH}" preserveAspectRatio="none" aria-label="Wykres słupkowy czasów">
+          <svg viewBox="0 0 ${vbW} ${vbH}" aria-label="Wykres słupkowy czasów">
             <!-- Linia osi dolnej i górnej siatki -->
             <line x1="${padLeft}" y1="${padTop}" x2="${vbW - padRight}" y2="${padTop}" stroke="#262b36" stroke-width="1" />
             <line x1="${padLeft}" y1="${padTop + plotH}" x2="${vbW - padRight}" y2="${padTop + plotH}" stroke="#262b36" stroke-width="1" />
 
             <!-- Etykiety osi Y -->
-            <text x="${padLeft - 6}" y="${padTop + 4}" fill="#64748b" font-size="10" text-anchor="end">${formatShortMS(maxScaleMs / 1000)}</text>
-            <text x="${padLeft - 6}" y="${padTop + plotH + 3}" fill="#64748b" font-size="10" text-anchor="end">00:00</text>
+            ${showTopLabel ? `<text x="${padLeft - 6}" y="${padTop + 4}" fill="#64748b" font-size="10" text-anchor="end">${formatShortMS(maxScaleMs / 1000)}</text>` : ""}
+            ${showBottomLabel ? `<text x="${padLeft - 6}" y="${padTop + plotH + 3}" fill="#64748b" font-size="10" text-anchor="end">00:00</text>` : ""}
 
             <!-- Słupki pozycji -->
             ${barsHtml}
 
-            <!-- Przerywana linia progu docelowego -->
-            <line x1="${padLeft}" y1="${targetY.toFixed(1)}" x2="${vbW - padRight}" y2="${targetY.toFixed(1)}" stroke="#3b82f6" stroke-width="1.6" stroke-dasharray="5 4" />
-            <text x="${padLeft - 6}" y="${(targetY + 3).toFixed(1)}" fill="#3b82f6" font-size="10" font-weight="700" text-anchor="end">${formatShortMS(state.targetSeconds)}</text>
+            ${targetOverlayHtml}
 
             <!-- Etykiety osi X -->
             ${xLabelsHtml}
+
+            <!-- Obszary kliknięcia / najechania -->
+            ${hitsHtml}
           </svg>
         `;
 
           els.chartBox.innerHTML = svgHtml;
 
           // Podgląd dokładnego czasu po kliknięciu lub najechaniu na słupek
-          const bars = els.chartBox.querySelectorAll(".svg-bar");
-          bars.forEach((bar) => {
+          const hits = els.chartBox.querySelectorAll(".svg-hit");
+          hits.forEach((hit) => {
             const showBarInfo = () => {
-              const idx = parseInt(bar.getAttribute("data-idx"), 10);
+              const idx = parseInt(hit.getAttribute("data-idx"), 10);
               const lap = state.laps[idx];
               if (!lap) return;
-              const diffMs = targetMs - lap.durationMs;
-              els.chartHoverInfo.textContent = `#${idx + 1}: ${formatLapMs(lap.durationMs)} (${formatSignedMS(diffMs)})`;
+              if (isFlow) {
+                els.chartHoverInfo.textContent = `#${idx + 1}: ${formatLapMs(lap.durationMs)}`;
+              } else {
+                const diffMs = targetMs - lap.durationMs;
+                els.chartHoverInfo.textContent = `#${idx + 1}: ${formatLapMs(lap.durationMs)} (${formatSignedMS(diffMs)})`;
+              }
             };
-            bar.addEventListener("mouseenter", showBarInfo);
-            bar.addEventListener("click", showBarInfo);
+            hit.addEventListener("mouseenter", showBarInfo);
+            hit.addEventListener("click", showBarInfo);
           });
         }
 
@@ -1826,12 +2241,15 @@
 
             const row = document.createElement("div");
             row.className = "lap-row tabular";
+            const diffHtml = state.slowFlow
+              ? ""
+              : `<span class="lap-diff ${isPlus ? "plus" : "minus"}">${formatSignedMS(diffMs)}</span>`;
             row.innerHTML = `
             <span class="lap-num">#${i + 1}</span>
             <span class="lap-time">${formatLapMs(lap.durationMs)}</span>
             <span class="lap-cum">${formatHMSCs(cumulative[i])}</span>
-            <span class="lap-diff ${isPlus ? "plus" : "minus"}">${formatSignedMS(diffMs)}</span>
-            <button class="row-del-btn" type="button" data-del-id="${lap.id}" aria-label="Usuń pomiar numer ${i + 1}" title="Usuń ten pomiar">x</button>
+            ${diffHtml}
+            <button class="row-del-btn" type="button" data-del-id="${escapeHtml(lap.id)}" aria-label="Usuń pomiar numer ${i + 1}" title="Usuń ten pomiar">x</button>
           `;
             frag.appendChild(row);
           }
@@ -1854,18 +2272,30 @@
           const frag = document.createDocumentFragment();
           for (let i = 0; i < list.length; i++) {
             const item = list[i];
+            const isFlowSession = item.mode === "slowflow";
             const balanceMs =
               item.count * item.targetSeconds * 1000 - item.totalMs;
             const balClass = balanceMs >= 0 ? "good" : "bad";
+            const fourthStatLabel = isFlowSession ? "Czas łączny" : "Bilans";
+            const fourthStatValue = isFlowSession
+              ? formatHMS(item.totalMs)
+              : formatSignedMS(balanceMs);
+            const fourthStatClass = isFlowSession ? "" : ` ${balClass}`;
+            const modeBadge = isFlowSession
+              ? '<span class="history-mode-badge">Slow Flow</span>'
+              : "";
 
             const card = document.createElement("div");
             card.className = "history-item";
             card.innerHTML = `
             <div class="history-item-top">
-              <span class="history-date tabular">${escapeHtml(item.dateLabel)}</span>
+              <div class="history-date-wrap">
+                <span class="history-date tabular">${escapeHtml(item.dateLabel)}</span>
+                ${modeBadge}
+              </div>
               <div class="history-actions">
-                <button class="mini-btn" type="button" data-hist-copy="${item.id}">Kopiuj</button>
-                <button class="row-del-btn" type="button" data-hist-del="${item.id}" aria-label="Usuń sesję z historii" title="Usuń sesję">x</button>
+                <button class="mini-btn" type="button" data-hist-copy="${escapeHtml(item.id)}">Kopiuj</button>
+                <button class="row-del-btn" type="button" data-hist-del="${escapeHtml(item.id)}" aria-label="Usuń sesję z historii" title="Usuń sesję">x</button>
               </div>
             </div>
             <div class="history-item-stats tabular">
@@ -1882,8 +2312,8 @@
                 <span class="h-stat-v">${formatPlDecimal(item.ratePerHour, 2)}/h</span>
               </div>
               <div class="h-stat">
-                <span class="h-stat-k">Bilans</span>
-                <span class="h-stat-v ${balClass}">${formatSignedMS(balanceMs)}</span>
+                <span class="h-stat-k">${fourthStatLabel}</span>
+                <span class="h-stat-v${fourthStatClass}">${fourthStatValue}</span>
               </div>
             </div>
           `;
@@ -1921,7 +2351,6 @@
             state.status = "running";
             state.currentLapAccumulatedMs = 0;
             state.currentLapStartTs = nowTs;
-            state.sessionStartedAt = new Date(nowTs).toISOString();
             triggerVibration(30);
             saveState();
             renderAllStatic();
@@ -2017,6 +2446,13 @@
               ? `Ukończone pozycje: ${stats.count}. Średnia: ${formatLapMs(stats.avgMs)}, tempo: ${formatPlDecimal(stats.ratePerHour, 2)} szt./godz.`
               : "Nie zaliczono jeszcze żadnej ukończonej pozycji. Możesz wyzerować stoper.";
 
+          const activeLapMs =
+            state.status !== "idle" ? getCurrentLapMs(Date.now()) : 0;
+          const note =
+            stats.count > 0 && activeLapMs >= 1000
+              ? `Bieżąca, niezakończona pozycja (${formatShortMS(activeLapMs / 1000)}) nie zostanie dołączona do zapisanej sesji.`
+              : "";
+
           const buttons = [];
           if (stats.count > 0) {
             buttons.push({
@@ -2047,7 +2483,7 @@
             onClick: closeModal,
           });
 
-          openModal("Zakończyć bieżącą sesję?", summary, buttons);
+          openModal("Zakończyć bieżącą sesję?", summary, buttons, note);
         }
 
         function archiveCurrentSession() {
@@ -2060,6 +2496,7 @@
           const record = {
             id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
             dateLabel,
+            mode: state.slowFlow ? "slowflow" : "target",
             count: stats.count,
             totalMs: stats.completedTotalMs,
             avgMs: stats.avgMs,
@@ -2078,7 +2515,6 @@
           state.laps = [];
           state.currentLapStartTs = null;
           state.currentLapAccumulatedMs = 0;
-          state.sessionStartedAt = null;
           lockoutUntil = 0;
           saveState();
           renderAllStatic();
@@ -2099,19 +2535,25 @@
           return lines.join("\n");
         }
 
-        function copyToClipboard(text, successMsg) {
+        function execCommandCopyFallback(text, successMsg) {
           try {
+            const activeEl = document.activeElement;
             const ta = document.createElement("textarea");
             ta.value = text;
-            ta.setAttribute("readonly", "");
             ta.style.position = "fixed";
-            ta.style.top = "-9999px";
-            ta.style.left = "-9999px";
+            ta.style.top = "0";
+            ta.style.left = "0";
+            ta.style.opacity = "0";
+            ta.style.pointerEvents = "none";
             document.body.appendChild(ta);
+            ta.focus();
             ta.select();
             ta.setSelectionRange(0, text.length);
             const ok = document.execCommand("copy");
             document.body.removeChild(ta);
+            if (activeEl && typeof activeEl.focus === "function") {
+              activeEl.focus();
+            }
             if (ok) {
               showToast(successMsg);
             } else {
@@ -2122,27 +2564,43 @@
           }
         }
 
+        function copyToClipboard(text, successMsg) {
+          if (
+            window.isSecureContext &&
+            navigator.clipboard &&
+            typeof navigator.clipboard.writeText === "function"
+          ) {
+            navigator.clipboard
+              .writeText(text)
+              .then(() => showToast(successMsg))
+              .catch(() => execCommandCopyFallback(text, successMsg));
+            return;
+          }
+          execCommandCopyFallback(text, successMsg);
+        }
+
         function exportCsv() {
           if (state.laps.length === 0) return;
           const targetMs = state.targetSeconds * 1000;
           const rows = [
-            "Nr;Czas pozycji;Czas laczny;Sekundy;Bilans wzgledem progu",
+            state.slowFlow
+              ? "Nr;Czas pozycji;Czas laczny;Sekundy"
+              : "Nr;Czas pozycji;Czas laczny;Sekundy;Bilans wzgledem progu",
           ];
           let sum = 0;
 
           for (let i = 0; i < state.laps.length; i++) {
             const d = state.laps[i].durationMs;
             sum += d;
-            const diff = targetMs - d;
-            rows.push(
-              [
-                i + 1,
-                formatHMSCs(d),
-                formatHMSCs(sum),
-                (d / 1000).toFixed(2).replace(".", ","),
-                formatSignedMS(diff),
-              ].join(";"),
-            );
+            const centiSec = (Math.floor(d / 10) / 100)
+              .toFixed(2)
+              .replace(".", ",");
+            const cols = [i + 1, formatHMSCs(d), formatHMSCs(sum), centiSec];
+            if (!state.slowFlow) {
+              const diff = targetMs - d;
+              cols.push(`" ${formatSignedMS(diff)}"`);
+            }
+            rows.push(cols.join(";"));
           }
 
           const csvContent = "\uFEFF" + rows.join("\r\n");
@@ -2164,9 +2622,11 @@
         }
 
         /* Niestandardowy modal i toast */
-        function openModal(title, text, buttons) {
+        function openModal(title, text, buttons, note) {
           els.modalTitle.textContent = title;
           els.modalText.textContent = text;
+          els.modalNote.textContent = note || "";
+          els.modalNote.hidden = !note;
           els.modalButtons.innerHTML = "";
 
           buttons.forEach((btnDef) => {
@@ -2183,6 +2643,7 @@
         }
 
         function closeModal() {
+          if (!els.modalBackdrop.classList.contains("open")) return;
           els.modalBackdrop.classList.remove("open");
         }
 
@@ -2196,6 +2657,18 @@
         }
 
         /* Obsługa zdarzeń */
+        els.slowFlowBtn.addEventListener("click", () => {
+          state.slowFlow = !state.slowFlow;
+          saveState();
+          renderAllStatic();
+          updateLiveDisplay(Date.now());
+          showToast(
+            state.slowFlow
+              ? "Tryb Slow Flow włączony — praca bez progu"
+              : "Tryb Slow Flow wyłączony — powrót do progu",
+          );
+        });
+
         els.goalToggleBtn.addEventListener("click", () => {
           const isOpen = els.goalPanel.classList.toggle("open");
           els.goalToggleBtn.classList.toggle("active", isOpen);
@@ -2212,8 +2685,8 @@
         els.targetSec.addEventListener("input", onTimeGoalChange);
         els.targetRate.addEventListener("input", onRateGoalChange);
 
-        els.targetMin.addEventListener("blur", () => syncGoalInputs("all"));
-        els.targetSec.addEventListener("blur", () => syncGoalInputs("all"));
+        els.targetMin.addEventListener("blur", commitTimeGoal);
+        els.targetSec.addEventListener("blur", commitTimeGoal);
         els.targetRate.addEventListener("blur", () => syncGoalInputs("all"));
 
         els.doubleTapGuard.addEventListener("change", () => {
@@ -2305,6 +2778,47 @@
         // Zamknięcie modala po kliknięciu w tło
         els.modalBackdrop.addEventListener("click", (e) => {
           if (e.target === els.modalBackdrop) closeModal();
+        });
+
+        // Obsługa klawiatury dla modala i panelu progu (Escape i pułapka fokusu Tab)
+        document.addEventListener("keydown", (e) => {
+          const modalOpen = els.modalBackdrop.classList.contains("open");
+          if (e.key === "Escape") {
+            if (modalOpen) {
+              closeModal();
+              return;
+            }
+            if (els.goalPanel.classList.contains("open")) {
+              els.goalPanel.classList.remove("open");
+              els.goalToggleBtn.classList.remove("active");
+              els.goalToggleBtn.setAttribute("aria-expanded", "false");
+            }
+            return;
+          }
+
+          if (e.key === "Tab" && modalOpen) {
+            const focusables = Array.from(
+              els.modalButtons.querySelectorAll("button"),
+            );
+            if (focusables.length === 0) return;
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+              e.preventDefault();
+              last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+        });
+
+        // Przerysowanie wykresu przy zmianie szerokości okna
+        window.addEventListener("resize", () => {
+          if (chartResizeTimer) clearTimeout(chartResizeTimer);
+          chartResizeTimer = setTimeout(() => {
+            if (state.laps.length > 0) renderSvgChart();
+          }, 120);
         });
 
         // Natychmiastowa synchronizacja czasu po powrocie z uśpienia telefonu / innej karty
