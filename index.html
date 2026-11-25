@@ -39,6 +39,9 @@
         --flow: #818cf8;
         --flow-bg: rgba(129, 140, 248, 0.14);
         --flow-border: rgba(129, 140, 248, 0.38);
+        --teal: #14b8a6;
+        --teal-bg: rgba(20, 184, 166, 0.14);
+        --teal-border: rgba(20, 184, 166, 0.4);
         --radius: 14px;
         --radius-sm: 10px;
       }
@@ -131,6 +134,11 @@
         box-shadow: 0 0 10px rgba(129, 140, 248, 0.7);
       }
 
+      .status-dot.running.stages {
+        background: var(--teal);
+        box-shadow: 0 0 10px rgba(20, 184, 166, 0.7);
+      }
+
       .status-dot.paused {
         background: #f59e0b;
         box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
@@ -141,47 +149,49 @@
         box-shadow: 0 0 8px rgba(148, 163, 184, 0.45);
       }
 
-      .flow-toggle-btn {
+      .mode-switch {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 2px;
         background: var(--card);
         border: 1px solid var(--border);
-        color: var(--text-muted);
-        padding: 8px 11px;
         border-radius: var(--radius-sm);
-        font-size: 0.82rem;
+        padding: 3px;
+      }
+
+      .mode-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        padding: 5px 9px;
+        border-radius: 7px;
+        font-size: 0.78rem;
         font-weight: 600;
         cursor: pointer;
         touch-action: manipulation;
+        white-space: nowrap;
         transition:
-          border-color 0.15s,
           background 0.15s,
           color 0.15s;
       }
 
-      .flow-toggle-btn:hover {
-        border-color: var(--flow-border);
+      .mode-btn:hover {
         color: var(--text);
-        background: var(--card-elevated);
       }
 
-      .flow-toggle-btn.active {
-        border-color: var(--flow-border);
+      .mode-btn.active[data-mode="target"] {
+        background: var(--blue-bg);
+        color: #93c5fd;
+      }
+
+      .mode-btn.active[data-mode="slowflow"] {
         background: var(--flow-bg);
         color: #c7d2fe;
       }
 
-      .flow-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--text-dim);
-        transition: background 0.15s;
-      }
-
-      .flow-toggle-btn.active .flow-dot {
-        background: var(--flow);
+      .mode-btn.active[data-mode="stages"] {
+        background: var(--teal-bg);
+        color: #5eead4;
       }
 
       .goal-toggle-btn {
@@ -224,8 +234,54 @@
       }
 
       .slow-flow-panel-note[hidden],
-      .goal-grid[hidden] {
+      .goal-grid[hidden],
+      .stage-config-wrap[hidden] {
         display: none;
+      }
+
+      .stage-config-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+      }
+
+      .stage-config-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .stage-editor-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .stage-editor-row {
+        display: grid;
+        grid-template-columns: 10px minmax(0, 1fr) auto auto auto;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .stage-idx-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .stage-name-input {
+        text-align: left;
+        font-size: 0.88rem;
+        padding: 7px 10px;
+      }
+
+      .stage-move-btn {
+        padding: 6px 8px;
+        font-size: 0.74rem;
       }
 
       /* Panel ustawień progu docelowego */
@@ -620,6 +676,17 @@
         white-space: nowrap;
       }
 
+      .main-btn-sub {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.84);
+        letter-spacing: 0.02em;
+      }
+
+      .main-btn-sub[hidden] {
+        display: none;
+      }
+
       .main-btn-action {
         font-size: 0.92rem;
         font-weight: 700;
@@ -726,6 +793,59 @@
         color: var(--red);
       }
 
+      /* Pasek dodatkowych wniosków (bez przeładowania siatki) */
+      .insights-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .insights-grid[hidden] {
+        display: none;
+      }
+
+      .insight-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 9px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+
+      .insight-val {
+        font-size: 0.96rem;
+        font-weight: 700;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .insight-sub {
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .insight-sub.good {
+        color: var(--green);
+      }
+
+      .insight-sub.bad {
+        color: var(--red);
+      }
+
+      @media (max-width: 380px) {
+        .insights-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
       /* Karta wykresu SVG */
       .chart-card {
         display: flex;
@@ -745,6 +865,157 @@
         font-size: 0.78rem;
         color: var(--text-muted);
         font-weight: 600;
+      }
+
+      .chart-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .chart-legend[hidden] {
+        display: none;
+      }
+
+      .legend-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 0.73rem;
+        font-weight: 600;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition:
+          border-color 0.15s,
+          color 0.15s,
+          opacity 0.15s;
+      }
+
+      .legend-pill.active {
+        border-color: var(--border-strong);
+        color: var(--text);
+        background: var(--card-elevated);
+      }
+
+      .legend-pill.dimmed {
+        opacity: 0.42;
+      }
+
+      .legend-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      /* Karta analizy etapów */
+      .stage-stats-card {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .stage-stats-card[hidden] {
+        display: none;
+      }
+
+      .stage-ideal-pill {
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #5eead4;
+        background: var(--teal-bg);
+        border: 1px solid var(--teal-border);
+        border-radius: 999px;
+        padding: 3px 9px;
+      }
+
+      .stage-highlights {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .stage-highlight-chip {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 5px 9px;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .stage-highlight-chip strong {
+        color: var(--text);
+      }
+
+      .stage-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+      }
+
+      .stage-stats-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+      }
+
+      .stage-stats-table th {
+        text-align: left;
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-dim);
+        padding: 0 4px 7px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .stage-stats-table th:not(:first-child),
+      .stage-stats-table td:not(:first-child) {
+        text-align: right;
+      }
+
+      .stage-stats-table td {
+        padding: 8px 4px;
+        border-bottom: 1px solid rgba(38, 43, 54, 0.55);
+        color: var(--text);
+        vertical-align: middle;
+      }
+
+      .stage-stats-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .stage-cell-name {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+      }
+
+      .stage-share {
+        color: var(--text-dim);
+        font-size: 0.74rem;
+        font-weight: 600;
+      }
+
+      .stage-trend {
+        font-size: 0.72rem;
+        font-weight: 700;
+        margin-left: 3px;
+      }
+
+      .stage-trend.faster {
+        color: var(--green);
+      }
+
+      .stage-trend.slower {
+        color: var(--red);
       }
 
       .chart-box {
@@ -856,6 +1127,45 @@
 
       .lap-row:last-child {
         border-bottom: none;
+      }
+
+      .lap-item {
+        border-bottom: 1px solid rgba(38, 43, 54, 0.55);
+      }
+
+      .lap-item:last-child {
+        border-bottom: none;
+      }
+
+      .lap-item .lap-row {
+        border-bottom: none;
+      }
+
+      .lap-row.expandable {
+        cursor: pointer;
+      }
+
+      .lap-stages-detail {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 0 4px 10px 42px;
+      }
+
+      .lap-stage-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 3px 8px;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .lap-stage-chip strong {
+        color: var(--text);
       }
 
       .lap-num {
@@ -1015,6 +1325,12 @@
         border: 1px solid var(--flow-border);
         border-radius: 999px;
         padding: 2px 7px;
+      }
+
+      .history-mode-badge.stages {
+        color: #5eead4;
+        background: var(--teal-bg);
+        border-color: var(--teal-border);
       }
 
       .history-item-stats {
@@ -1211,15 +1527,32 @@
           <h1 class="brand-title">TEMPO</h1>
         </div>
         <div class="header-actions">
-          <button
-            id="slowFlowBtn"
-            class="flow-toggle-btn"
-            type="button"
-            aria-pressed="false"
-          >
-            <span class="flow-dot" aria-hidden="true"></span>
-            <span>Slow Flow</span>
-          </button>
+          <div id="modeSwitch" class="mode-switch" role="group" aria-label="Tryb pracy">
+            <button
+              class="mode-btn active"
+              type="button"
+              data-mode="target"
+              aria-pressed="true"
+            >
+              Cel
+            </button>
+            <button
+              class="mode-btn"
+              type="button"
+              data-mode="slowflow"
+              aria-pressed="false"
+            >
+              Slow Flow
+            </button>
+            <button
+              class="mode-btn"
+              type="button"
+              data-mode="stages"
+              aria-pressed="false"
+            >
+              Etapy
+            </button>
+          </div>
           <button
             id="goalToggleBtn"
             class="goal-toggle-btn tabular"
@@ -1291,6 +1624,15 @@
             />
           </div>
         </div>
+        <div id="stageConfigWrap" class="stage-config-wrap" hidden>
+          <div class="stage-config-head">
+            <span class="field-label">Etapy cyklu (2–8)</span>
+            <button id="addStageBtn" class="mini-btn" type="button">
+              + Dodaj etap
+            </button>
+          </div>
+          <div id="stageEditorList" class="stage-editor-list"></div>
+        </div>
         <div class="setting-row">
           <span class="setting-desc"
             >Blokada podwójnego kliknięcia (1,5 s po zaliczeniu)</span
@@ -1333,6 +1675,9 @@
           >Gotowy do startu</span
         >
         <span id="mainBtnTimer" class="main-btn-timer tabular">00:00.00</span>
+        <span id="mainBtnSub" class="main-btn-sub tabular" hidden
+          >Cykl: 00:00.00</span
+        >
         <span id="mainBtnAction" class="main-btn-action">START</span>
         <span id="cooldownBar" class="cooldown-bar"></span>
       </button>
@@ -1382,16 +1727,70 @@
         </div>
       </section>
 
+      <!-- Pasek dodatkowych statystyk sesji -->
+      <section
+        id="insightsStrip"
+        class="insights-grid"
+        aria-label="Trendy i skuteczność sesji"
+        hidden
+      >
+        <div class="insight-card">
+          <span id="insight1Label" class="stat-label">Ost. 5 cykli</span>
+          <span id="insight1Val" class="insight-val tabular">--:--.--</span>
+          <span id="insight1Sub" class="insight-sub tabular"></span>
+        </div>
+        <div class="insight-card">
+          <span id="insight2Label" class="stat-label">W progu</span>
+          <span id="insight2Val" class="insight-val tabular">0 / 0</span>
+          <span id="insight2Sub" class="insight-sub tabular"></span>
+        </div>
+        <div class="insight-card">
+          <span id="insight3Label" class="stat-label">Bez najgorszego</span>
+          <span id="insight3Val" class="insight-val tabular">--:--.--</span>
+          <span id="insight3Sub" class="insight-sub tabular"></span>
+        </div>
+      </section>
+
       <!-- 5. Minimalistyczny wykres w czystym SVG -->
       <section class="card chart-card" aria-label="Wykres czasów pozycji">
         <div class="chart-meta">
           <span id="chartTitle" class="panel-title">Czasy pozycji względem progu</span>
           <span id="chartHoverInfo" class="chart-hover-info tabular"></span>
         </div>
+        <div id="chartLegend" class="chart-legend" hidden></div>
         <div id="chartBox" class="chart-box">
           <div class="chart-empty">
             Zalicz pierwszą pozycję, aby zobaczyć wykres
           </div>
+        </div>
+      </section>
+
+      <!-- Analiza poszczególnych etapów -->
+      <section
+        id="stageStatsCard"
+        class="card stage-stats-card"
+        aria-label="Analiza etapów w sesji"
+        hidden
+      >
+        <div class="panel-header">
+          <span class="panel-title">Analiza etapów</span>
+          <span id="stageIdealPill" class="stage-ideal-pill tabular"
+            >Idealny cykl: --:--.--</span
+          >
+        </div>
+        <div id="stageHighlights" class="stage-highlights"></div>
+        <div class="stage-table-wrap">
+          <table class="stage-stats-table tabular">
+            <thead>
+              <tr>
+                <th>Etap</th>
+                <th>Średnia</th>
+                <th>Mediana</th>
+                <th>Min – Max</th>
+              </tr>
+            </thead>
+            <tbody id="stageStatsBody"></tbody>
+          </table>
         </div>
       </section>
 
@@ -1470,17 +1869,34 @@
         /* Klucz zapisu w localStorage oraz stałe */
         const STORAGE_KEY = "tempo_work_tracker_v1";
         const LOCKOUT_MS = 1500;
+        const STAGE_COLORS = [
+          "#3b82f6",
+          "#8b5cf6",
+          "#14b8a6",
+          "#f59e0b",
+          "#ec4899",
+          "#06b6d4",
+          "#84cc16",
+          "#f97316",
+        ];
+
+        function createDefaultStageNames() {
+          return ["Etap 1", "Etap 2", "Etap 3"];
+        }
 
         /* Domyślny stan aplikacji */
         function createDefaultState() {
           return {
             status: "idle", // "idle" | "running" | "paused"
-            laps: [], // [{ id: string, durationMs: number }]
+            laps: [], // [{ id: string, durationMs: number, stages?: Array<{name, durationMs}> }]
             currentLapStartTs: null,
             currentLapAccumulatedMs: 0,
             targetSeconds: 360, // domyślnie 06:00 (10.0 / godz.)
             doubleTapGuard: true,
-            slowFlow: false,
+            mode: "target", // "target" | "slowflow" | "stages"
+            stageNames: createDefaultStageNames(),
+            currentStageIndex: 0,
+            currentCycleStages: [],
             history: [],
           };
         }
@@ -1491,11 +1907,13 @@
         let toastTimer = null;
         let storageWarningShown = false;
         let chartResizeTimer = null;
+        let selectedStageFilter = null;
+        const expandedLapIds = new Set();
 
         /* Referencje do elementów DOM */
         const els = {
           statusDot: document.getElementById("statusDot"),
-          slowFlowBtn: document.getElementById("slowFlowBtn"),
+          modeSwitch: document.getElementById("modeSwitch"),
           goalToggleBtn: document.getElementById("goalToggleBtn"),
           goalPillLabel: document.getElementById("goalPillLabel"),
           goalSummaryText: document.getElementById("goalSummaryText"),
@@ -1503,6 +1921,9 @@
           goalPanelTitle: document.getElementById("goalPanelTitle"),
           slowFlowPanelNote: document.getElementById("slowFlowPanelNote"),
           goalGrid: document.getElementById("goalGrid"),
+          stageConfigWrap: document.getElementById("stageConfigWrap"),
+          stageEditorList: document.getElementById("stageEditorList"),
+          addStageBtn: document.getElementById("addStageBtn"),
           goalCloseBtn: document.getElementById("goalCloseBtn"),
           targetMin: document.getElementById("targetMin"),
           targetSec: document.getElementById("targetSec"),
@@ -1520,6 +1941,7 @@
           mainBtn: document.getElementById("mainBtn"),
           mainBtnTop: document.getElementById("mainBtnTop"),
           mainBtnTimer: document.getElementById("mainBtnTimer"),
+          mainBtnSub: document.getElementById("mainBtnSub"),
           mainBtnAction: document.getElementById("mainBtnAction"),
           cooldownBar: document.getElementById("cooldownBar"),
 
@@ -1534,9 +1956,26 @@
           statRate: document.getElementById("statRate"),
           statBest: document.getElementById("statBest"),
 
+          insightsStrip: document.getElementById("insightsStrip"),
+          insight1Label: document.getElementById("insight1Label"),
+          insight1Val: document.getElementById("insight1Val"),
+          insight1Sub: document.getElementById("insight1Sub"),
+          insight2Label: document.getElementById("insight2Label"),
+          insight2Val: document.getElementById("insight2Val"),
+          insight2Sub: document.getElementById("insight2Sub"),
+          insight3Label: document.getElementById("insight3Label"),
+          insight3Val: document.getElementById("insight3Val"),
+          insight3Sub: document.getElementById("insight3Sub"),
+
           chartBox: document.getElementById("chartBox"),
           chartTitle: document.getElementById("chartTitle"),
+          chartLegend: document.getElementById("chartLegend"),
           chartHoverInfo: document.getElementById("chartHoverInfo"),
+
+          stageStatsCard: document.getElementById("stageStatsCard"),
+          stageIdealPill: document.getElementById("stageIdealPill"),
+          stageHighlights: document.getElementById("stageHighlights"),
+          stageStatsBody: document.getElementById("stageStatsBody"),
 
           copyListBtn: document.getElementById("copyListBtn"),
           exportCsvBtn: document.getElementById("exportCsvBtn"),
@@ -1557,6 +1996,43 @@
         };
 
         /* Bezpieczny odczyt i zapis localStorage */
+        function sanitizeStagesArray(arr) {
+          if (!Array.isArray(arr)) return null;
+          const valid = arr
+            .filter(
+              (s) =>
+                s &&
+                typeof s.name === "string" &&
+                typeof s.durationMs === "number" &&
+                Number.isFinite(s.durationMs) &&
+                s.durationMs >= 0,
+            )
+            .map((s) => ({
+              name: s.name.trim() || "Etap",
+              durationMs: s.durationMs,
+            }));
+          return valid.length > 0 ? valid : null;
+        }
+
+        function sanitizeLapItem(l, requireId) {
+          if (!l || typeof l !== "object") return null;
+          if (requireId && (typeof l.id !== "string" || l.id.length === 0)) {
+            return null;
+          }
+          if (
+            typeof l.durationMs !== "number" ||
+            !Number.isFinite(l.durationMs) ||
+            l.durationMs < 0
+          ) {
+            return null;
+          }
+          const clean = { durationMs: l.durationMs };
+          if (requireId) clean.id = l.id;
+          const stages = sanitizeStagesArray(l.stages);
+          if (stages) clean.stages = stages;
+          return clean;
+        }
+
         function sanitizeHistoryItem(item) {
           if (!item || typeof item !== "object") return null;
           if (typeof item.id !== "string" || !item.id) return null;
@@ -1597,19 +2073,30 @@
             return null;
           }
           if (!Array.isArray(item.laps)) return null;
-          const validLaps = item.laps.filter(
-            (l) =>
-              l &&
-              typeof l.durationMs === "number" &&
-              Number.isFinite(l.durationMs) &&
-              l.durationMs >= 0,
-          );
+          const validLaps = item.laps
+            .map((l) => sanitizeLapItem(l, false))
+            .filter(Boolean);
           if (validLaps.length === 0) return null;
+          const mode = ["target", "slowflow", "stages"].includes(item.mode)
+            ? item.mode
+            : "target";
           return {
             ...item,
-            mode: item.mode === "slowflow" ? "slowflow" : "target",
+            mode,
             laps: validLaps,
           };
+        }
+
+        function sanitizeStageNames(arr) {
+          if (!Array.isArray(arr)) return createDefaultStageNames();
+          const cleaned = arr
+            .slice(0, 8)
+            .map((name, i) =>
+              typeof name === "string" && name.trim()
+                ? name.trim().slice(0, 28)
+                : `Etap ${i + 1}`,
+            );
+          return cleaned.length >= 2 ? cleaned : createDefaultStageNames();
         }
 
         function loadState() {
@@ -1632,18 +2119,32 @@
               status = "paused";
             }
 
+            let mode = "target";
+            if (["target", "slowflow", "stages"].includes(parsed.mode)) {
+              mode = parsed.mode;
+            } else if (parsed.slowFlow === true) {
+              mode = "slowflow";
+            }
+
+            const stageNames = sanitizeStageNames(parsed.stageNames);
+            const currentCycleStages =
+              sanitizeStagesArray(parsed.currentCycleStages) || [];
+            const rawStageIdx =
+              typeof parsed.currentStageIndex === "number" &&
+              Number.isInteger(parsed.currentStageIndex)
+                ? parsed.currentStageIndex
+                : currentCycleStages.length;
+            const currentStageIndex =
+              mode === "stages"
+                ? Math.max(0, Math.min(stageNames.length - 1, rawStageIdx))
+                : 0;
+
             return {
               status,
               laps: Array.isArray(parsed.laps)
-                ? parsed.laps.filter(
-                    (l) =>
-                      l &&
-                      typeof l.id === "string" &&
-                      l.id.length > 0 &&
-                      typeof l.durationMs === "number" &&
-                      Number.isFinite(l.durationMs) &&
-                      l.durationMs >= 0,
-                  )
+                ? parsed.laps
+                    .map((l) => sanitizeLapItem(l, true))
+                    .filter(Boolean)
                 : [],
               currentLapStartTs,
               currentLapAccumulatedMs:
@@ -1660,8 +2161,10 @@
                 typeof parsed.doubleTapGuard === "boolean"
                   ? parsed.doubleTapGuard
                   : true,
-              slowFlow:
-                typeof parsed.slowFlow === "boolean" ? parsed.slowFlow : false,
+              mode,
+              stageNames,
+              currentStageIndex,
+              currentCycleStages: mode === "stages" ? currentCycleStages : [],
               history: Array.isArray(parsed.history)
                 ? parsed.history.map(sanitizeHistoryItem).filter(Boolean)
                 : [],
@@ -1772,16 +2275,28 @@
           return state.currentLapAccumulatedMs;
         }
 
+        function getActiveCycleFinishedStagesMs() {
+          let sum = 0;
+          for (let i = 0; i < state.currentCycleStages.length; i++) {
+            sum += state.currentCycleStages[i].durationMs;
+          }
+          return sum;
+        }
+
         function computeStats() {
           const count = state.laps.length;
           const targetMs = state.targetSeconds * 1000;
           let completedTotalMs = 0;
           let bestMs = Infinity;
+          let worstMs = 0;
+          let hitCount = 0;
 
           for (let i = 0; i < count; i++) {
             const d = state.laps[i].durationMs;
             completedTotalMs += d;
             if (d < bestMs) bestMs = d;
+            if (d > worstMs) worstMs = d;
+            if (d <= targetMs) hitCount++;
           }
 
           if (count === 0) {
@@ -1792,6 +2307,8 @@
               medianMs: 0,
               ratePerHour: 0,
               bestMs: 0,
+              worstMs: 0,
+              hitCount: 0,
               balanceMs: 0,
             };
           }
@@ -1815,7 +2332,152 @@
             medianMs,
             ratePerHour,
             bestMs,
+            worstMs,
+            hitCount,
             balanceMs,
+          };
+        }
+
+        function computeInsights(stats) {
+          const count = stats.count;
+          if (count === 0) return null;
+
+          const recentSlice = state.laps.slice(-Math.min(5, count));
+          let recentSum = 0;
+          for (let i = 0; i < recentSlice.length; i++) {
+            recentSum += recentSlice[i].durationMs;
+          }
+          const recentAvgMs = recentSum / recentSlice.length;
+          const recentRate =
+            recentSum > 0 ? (recentSlice.length * 3600000) / recentSum : 0;
+          const deltaRatio =
+            count >= 4 && stats.avgMs > 0
+              ? (recentAvgMs - stats.avgMs) / stats.avgMs
+              : 0;
+
+          const hitPct = Math.round((stats.hitCount / count) * 100);
+          const trimmedAvgMs =
+            count >= 3
+              ? (stats.completedTotalMs - stats.worstMs) / (count - 1)
+              : stats.avgMs;
+
+          return {
+            recentCount: recentSlice.length,
+            recentAvgMs,
+            recentRate,
+            deltaRatio,
+            hitCount: stats.hitCount,
+            hitPct,
+            trimmedAvgMs,
+          };
+        }
+
+        function computeStageStats() {
+          const stageLaps = state.laps.filter(
+            (l) => Array.isArray(l.stages) && l.stages.length > 0,
+          );
+          if (stageLaps.length === 0) return null;
+
+          let maxStages = 0;
+          let totalStageCyclesMs = 0;
+          for (let i = 0; i < stageLaps.length; i++) {
+            totalStageCyclesMs += stageLaps[i].durationMs;
+            if (stageLaps[i].stages.length > maxStages) {
+              maxStages = stageLaps[i].stages.length;
+            }
+          }
+
+          const rows = [];
+          let idealCycleMs = 0;
+          let allStagesPresent = true;
+          let bottleneck = null;
+          let mostVariable = null;
+
+          for (let idx = 0; idx < maxStages; idx++) {
+            const durations = [];
+            let lastSeenName = "";
+            let sum = 0;
+            let minMs = Infinity;
+            let maxMs = 0;
+
+            for (let i = 0; i < stageLaps.length; i++) {
+              const st = stageLaps[i].stages[idx];
+              if (st) {
+                durations.push(st.durationMs);
+                sum += st.durationMs;
+                if (st.durationMs < minMs) minMs = st.durationMs;
+                if (st.durationMs > maxMs) maxMs = st.durationMs;
+                lastSeenName = st.name;
+              }
+            }
+
+            if (durations.length === 0) {
+              allStagesPresent = false;
+              continue;
+            }
+
+            const name =
+              state.mode === "stages" && state.stageNames[idx]
+                ? state.stageNames[idx]
+                : lastSeenName || `Etap ${idx + 1}`;
+            const avgMs = sum / durations.length;
+            const sorted = durations.slice().sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            const medianMs =
+              sorted.length % 2 === 1
+                ? sorted[mid]
+                : (sorted[mid - 1] + sorted[mid]) / 2;
+            const spreadMs = maxMs - minMs;
+            const sharePct =
+              totalStageCyclesMs > 0 ? (sum / totalStageCyclesMs) * 100 : 0;
+
+            let trend = null;
+            if (durations.length >= 4) {
+              const half = Math.floor(durations.length / 2);
+              const firstAvg =
+                durations.slice(0, half).reduce((a, b) => a + b, 0) / half;
+              const secondSlice = durations.slice(-half);
+              const secondAvg =
+                secondSlice.reduce((a, b) => a + b, 0) / secondSlice.length;
+              if (firstAvg > 0) {
+                const change = (secondAvg - firstAvg) / firstAvg;
+                if (change <= -0.05) trend = "faster";
+                else if (change >= 0.05) trend = "slower";
+              }
+            }
+
+            idealCycleMs += minMs;
+            const row = {
+              idx,
+              name,
+              color: STAGE_COLORS[idx % STAGE_COLORS.length],
+              count: durations.length,
+              totalMs: sum,
+              avgMs,
+              medianMs,
+              minMs,
+              maxMs,
+              spreadMs,
+              sharePct,
+              trend,
+            };
+            rows.push(row);
+
+            if (!bottleneck || row.totalMs > bottleneck.totalMs) {
+              bottleneck = row;
+            }
+            if (!mostVariable || row.spreadMs > mostVariable.spreadMs) {
+              mostVariable = row;
+            }
+          }
+
+          if (rows.length === 0) return null;
+          return {
+            cycleCount: stageLaps.length,
+            rows,
+            idealCycleMs: allStagesPresent ? idealCycleMs : 0,
+            bottleneck,
+            mostVariable: stageLaps.length >= 2 ? mostVariable : null,
           };
         }
 
@@ -1837,11 +2499,38 @@
             els.targetRate.value = formatPlDecimal(rate, 1);
           }
 
-          els.goalPillLabel.hidden = state.slowFlow;
-          els.goalSummaryText.textContent = state.slowFlow
-            ? "Opcje"
-            : `${formatShortMS(totalSec)} | ${formatPlDecimal(rate, 1)}/h`;
+          if (state.mode === "slowflow") {
+            els.goalPillLabel.hidden = true;
+            els.goalSummaryText.textContent = "Opcje";
+          } else if (state.mode === "stages") {
+            els.goalPillLabel.hidden = true;
+            els.goalSummaryText.textContent = `${formatShortMS(totalSec)} · ${state.stageNames.length} et.`;
+          } else {
+            els.goalPillLabel.hidden = false;
+            els.goalSummaryText.textContent = `${formatShortMS(totalSec)} | ${formatPlDecimal(rate, 1)}/h`;
+          }
           els.doubleTapGuard.checked = state.doubleTapGuard;
+        }
+
+        function renderStageEditor() {
+          const frag = document.createDocumentFragment();
+          const canDelete = state.stageNames.length > 2;
+          for (let i = 0; i < state.stageNames.length; i++) {
+            const row = document.createElement("div");
+            row.className = "stage-editor-row";
+            const color = STAGE_COLORS[i % STAGE_COLORS.length];
+            row.innerHTML = `
+              <span class="stage-idx-dot" style="background:${color}"></span>
+              <input class="input-box stage-name-input" type="text" maxlength="28" value="${escapeHtml(state.stageNames[i])}" data-stage-name="${i}" aria-label="Nazwa etapu ${i + 1}" />
+              <button class="mini-btn stage-move-btn" type="button" data-stage-up="${i}" aria-label="Przesuń etap ${i + 1} w górę" ${i === 0 ? "disabled" : ""}>↑</button>
+              <button class="mini-btn stage-move-btn" type="button" data-stage-down="${i}" aria-label="Przesuń etap ${i + 1} w dół" ${i === state.stageNames.length - 1 ? "disabled" : ""}>↓</button>
+              <button class="row-del-btn" type="button" data-stage-del="${i}" aria-label="Usuń etap ${i + 1}" ${!canDelete ? "disabled" : ""}>x</button>
+            `;
+            frag.appendChild(row);
+          }
+          els.stageEditorList.innerHTML = "";
+          els.stageEditorList.appendChild(frag);
+          els.addStageBtn.disabled = state.stageNames.length >= 8;
         }
 
         function applyTimeGoal(commit) {
@@ -1890,9 +2579,20 @@
           updateLiveDisplay(Date.now());
         }
 
+        function pluralEtap(n) {
+          if (n === 1) return "etap";
+          if (n >= 2 && n <= 4) return "etapy";
+          return "etapów";
+        }
+
         /* Aktualizacja płynnych liczników (wywoływana w pętli rAF) */
         function updateLiveDisplay(nowTs) {
-          const currentLapMs = getCurrentLapMs(nowTs);
+          const currentStageMs = getCurrentLapMs(nowTs);
+          const isStages = state.mode === "stages";
+          const isFlow = state.mode === "slowflow";
+          const activeCycleMs = isStages
+            ? getActiveCycleFinishedStagesMs() + currentStageMs
+            : currentStageMs;
           const targetMs = state.targetSeconds * 1000;
           const stats = computeStats();
 
@@ -1916,57 +2616,86 @@
             "over-target",
             "slow-flow-active",
           );
-          els.mainBtn.classList.toggle("slow-flow-active", state.slowFlow);
+          els.mainBtn.classList.toggle("slow-flow-active", isFlow);
+          els.mainBtnSub.hidden = !isStages;
 
-          const formatMainTimer = state.slowFlow
-            ? formatLapWholeSec
-            : formatLapMs;
+          const formatMainTimer = isFlow ? formatLapWholeSec : formatLapMs;
+          const stageCount = state.stageNames.length;
+          const safeStageIdx = Math.max(
+            0,
+            Math.min(stageCount - 1, state.currentStageIndex),
+          );
+          const currentStageName = state.stageNames[safeStageIdx];
 
           if (state.status === "idle") {
-            els.mainBtnTop.textContent = state.slowFlow
-              ? "Tryb Slow Flow — gotowy"
-              : "Gotowy do startu";
-            els.mainBtnTimer.textContent = state.slowFlow
-              ? "00:00"
-              : "00:00.00";
+            if (isFlow) {
+              els.mainBtnTop.textContent = "Tryb Slow Flow — gotowy";
+            } else if (isStages) {
+              els.mainBtnTop.textContent = `Tryb etapowy — ${stageCount} ${pluralEtap(stageCount)}`;
+              els.mainBtnSub.textContent = `Etap 1: ${state.stageNames[0]}`;
+            } else {
+              els.mainBtnTop.textContent = "Gotowy do startu";
+            }
+            els.mainBtnTimer.textContent = isFlow ? "00:00" : "00:00.00";
             els.mainBtnAction.textContent = "START";
           } else if (state.status === "running") {
             els.mainBtn.classList.add("running");
-            if (!state.slowFlow && currentLapMs > targetMs) {
+            if (!isFlow && activeCycleMs > targetMs) {
               els.mainBtn.classList.add("over-target");
             }
-            els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1}`;
-            els.mainBtnTimer.textContent = formatMainTimer(currentLapMs);
-            els.mainBtnAction.textContent = "ZALICZ POZYCJĘ";
+            if (isStages) {
+              els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1} · Etap ${safeStageIdx + 1}/${stageCount}: ${currentStageName}`;
+              els.mainBtnTimer.textContent = formatLapMs(currentStageMs);
+              els.mainBtnSub.textContent = `Cykl: ${formatLapMs(activeCycleMs)}`;
+              els.mainBtnAction.textContent =
+                safeStageIdx < stageCount - 1
+                  ? `NASTĘPNY: ${state.stageNames[safeStageIdx + 1]}`
+                  : "ZAKOŃCZ CYKL";
+            } else {
+              els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1}`;
+              els.mainBtnTimer.textContent = formatMainTimer(currentStageMs);
+              els.mainBtnAction.textContent = "ZALICZ POZYCJĘ";
+            }
           } else if (state.status === "paused") {
             els.mainBtn.classList.add("paused");
-            els.mainBtnTop.textContent = `Wstrzymano — Pozycja #${state.laps.length + 1}`;
-            els.mainBtnTimer.textContent = formatMainTimer(currentLapMs);
-            els.mainBtnAction.textContent = "WZNÓW POMIAR";
+            if (isStages) {
+              els.mainBtnTop.textContent = `Wstrzymano · Etap ${safeStageIdx + 1}/${stageCount}: ${currentStageName}`;
+              els.mainBtnTimer.textContent = formatLapMs(currentStageMs);
+              els.mainBtnSub.textContent = `Cykl: ${formatLapMs(activeCycleMs)}`;
+              els.mainBtnAction.textContent = "WZNÓW ETAP";
+            } else {
+              els.mainBtnTop.textContent = `Wstrzymano — Pozycja #${state.laps.length + 1}`;
+              els.mainBtnTimer.textContent = formatMainTimer(currentStageMs);
+              els.mainBtnAction.textContent = "WZNÓW POMIAR";
+            }
           }
 
-          // Czas łączny sesji (ukończone + aktywne okrążenie)
+          // Czas łączny sesji (ukończone + aktywny cykl)
           const liveSessionTotalMs =
             stats.completedTotalMs +
-            (state.status === "idle" ? 0 : currentLapMs);
+            (state.status === "idle" ? 0 : activeCycleMs);
           els.statTotal.textContent = formatHMS(liveSessionTotalMs);
 
-          if (state.slowFlow) {
+          if (isFlow) {
             els.balanceValue.textContent = formatHMS(liveSessionTotalMs);
             return;
           }
 
-          // Wskaźnik bieżącego okrążenia względem progu
+          // Wskaźnik bieżącego cyklu względem progu
           if (state.status === "idle") {
-            els.currentLapLabel.textContent = "Bieżąca pozycja";
+            els.currentLapLabel.textContent = isStages
+              ? "Bieżący cykl"
+              : "Bieżąca pozycja";
             els.currentLapDelta.textContent = `Próg: ${formatShortMS(state.targetSeconds)}`;
             els.currentLapDelta.className = "current-lap-delta tabular";
             els.currentLapProgress.style.width = "0%";
             els.currentLapProgress.classList.remove("over");
           } else {
-            els.currentLapLabel.textContent = `Bieżąca pozycja #${state.laps.length + 1}`;
-            const diffToTargetMs = targetMs - currentLapMs;
-            const pct = Math.min(100, (currentLapMs / targetMs) * 100);
+            els.currentLapLabel.textContent = isStages
+              ? `Bieżący cykl #${state.laps.length + 1}`
+              : `Bieżąca pozycja #${state.laps.length + 1}`;
+            const diffToTargetMs = targetMs - activeCycleMs;
+            const pct = Math.min(100, (activeCycleMs / targetMs) * 100);
             els.currentLapProgress.style.width = `${pct}%`;
 
             if (diffToTargetMs >= 0) {
@@ -2004,31 +2733,48 @@
         /* Renderowanie statycznych elementów (bilans, karty, wykres, lista, przyciski) */
         function renderAllStatic() {
           const stats = computeStats();
+          const stageStats = computeStageStats();
+          const isFlow = state.mode === "slowflow";
+          const isStages = state.mode === "stages";
           const targetMs = state.targetSeconds * 1000;
 
-          // Tryb Slow Flow / cel
-          els.slowFlowBtn.classList.toggle("active", state.slowFlow);
-          els.slowFlowBtn.setAttribute("aria-pressed", String(state.slowFlow));
-          els.goalPanelTitle.textContent = state.slowFlow
+          // Przełącznik 3 trybów i panel ustawień
+          const modeBtns = els.modeSwitch.querySelectorAll(".mode-btn");
+          modeBtns.forEach((btn) => {
+            const active = btn.getAttribute("data-mode") === state.mode;
+            btn.classList.toggle("active", active);
+            btn.setAttribute("aria-pressed", String(active));
+          });
+
+          els.goalPanelTitle.textContent = isFlow
             ? "Ustawienia"
-            : "Próg docelowy";
-          els.goalGrid.hidden = state.slowFlow;
-          els.slowFlowPanelNote.hidden = !state.slowFlow;
-          els.chartTitle.textContent = state.slowFlow
+            : isStages
+              ? "Próg cyklu i etapy"
+              : "Próg docelowy";
+          els.goalGrid.hidden = isFlow;
+          els.slowFlowPanelNote.hidden = !isFlow;
+          els.stageConfigWrap.hidden = !isStages;
+          if (isStages) {
+            renderStageEditor();
+          }
+
+          els.chartTitle.textContent = isFlow
             ? "Czasy pozycji w sesji"
-            : "Czasy pozycji względem progu";
-          els.lapSection.classList.toggle("slow-flow", state.slowFlow);
+            : isStages
+              ? "Czasy cykli i etapów"
+              : "Czasy pozycji względem progu";
+          els.lapSection.classList.toggle("slow-flow", isFlow);
           syncGoalInputs("all");
 
           // Kropka statusu
           els.statusDot.className =
             "status-dot" +
             (state.status !== "idle" ? ` ${state.status}` : "") +
-            (state.slowFlow ? " slow-flow" : "");
+            (isFlow ? " slow-flow" : isStages ? " stages" : "");
 
           // Bilans sesji / widok Slow Flow
           els.balanceCard.classList.remove("ahead", "behind", "slow-flow");
-          if (state.slowFlow) {
+          if (isFlow) {
             els.balanceCard.classList.add("slow-flow");
             els.balanceTag.textContent = "TRYB SLOW FLOW";
             els.balanceSub.textContent =
@@ -2054,10 +2800,15 @@
 
           // Przyciski sterujące
           const hasActivity = state.status !== "idle" || stats.count > 0;
+          const canUndo =
+            stats.count > 0 || state.currentCycleStages.length > 0;
           els.pauseBtn.disabled = state.status === "idle";
           els.pauseBtn.textContent =
             state.status === "paused" ? "Wznów" : "Pauza";
-          els.undoBtn.disabled = stats.count === 0;
+          els.undoBtn.disabled = !canUndo;
+          els.undoBtn.textContent = isStages
+            ? "Cofnij etap"
+            : "Cofnij ostatnią";
           els.finishBtn.disabled = !hasActivity;
           els.copyListBtn.disabled = stats.count === 0;
           els.exportCsvBtn.disabled = stats.count === 0;
@@ -2067,7 +2818,7 @@
           els.statAvg.className = "stat-value tabular";
           if (stats.count > 0) {
             els.statAvg.textContent = formatLapMs(stats.avgMs);
-            if (!state.slowFlow) {
+            if (!isFlow) {
               els.statAvg.classList.add(
                 stats.avgMs <= targetMs ? "good" : "bad",
               );
@@ -2082,9 +2833,119 @@
             els.statBest.textContent = "--:--.--";
           }
 
-          renderSvgChart();
+          renderInsights(stats, stageStats);
+          renderSvgChart(stageStats);
+          renderStageStats(stageStats);
           renderLapList();
           renderHistory();
+        }
+
+        function renderInsights(stats, stageStats) {
+          if (state.mode === "slowflow" || stats.count < 2) {
+            els.insightsStrip.hidden = true;
+            return;
+          }
+          const ins = computeInsights(stats);
+          if (!ins) {
+            els.insightsStrip.hidden = true;
+            return;
+          }
+          els.insightsStrip.hidden = false;
+
+          // 1. Ost. 5 cykli
+          els.insight1Label.textContent =
+            ins.recentCount < 5
+              ? `Ost. ${ins.recentCount} cykle`
+              : "Ost. 5 cykli";
+          els.insight1Val.textContent = formatLapMs(ins.recentAvgMs);
+          els.insight1Sub.className = "insight-sub tabular";
+          if (Math.abs(ins.deltaRatio) >= 0.03) {
+            const pct = Math.round(Math.abs(ins.deltaRatio) * 100);
+            const faster = ins.deltaRatio < 0;
+            els.insight1Sub.textContent = faster
+              ? `↓ szybciej o ${pct}%`
+              : `↑ wolniej o ${pct}%`;
+            els.insight1Sub.classList.add(faster ? "good" : "bad");
+          } else {
+            els.insight1Sub.textContent = `${formatPlDecimal(ins.recentRate, 1)} / h`;
+          }
+
+          // 2. W progu
+          els.insight2Label.textContent = "W progu";
+          els.insight2Val.textContent = `${ins.hitCount} / ${stats.count}`;
+          els.insight2Sub.className = "insight-sub tabular";
+          els.insight2Sub.textContent = `${ins.hitPct}% skuteczności`;
+
+          // 3. Idealny cykl (gdy są etapy) lub Bez najgorszego
+          if (stageStats && stageStats.idealCycleMs > 0) {
+            els.insight3Label.textContent = "Idealny cykl";
+            els.insight3Val.textContent = formatLapMs(stageStats.idealCycleMs);
+            els.insight3Sub.className = "insight-sub tabular";
+            els.insight3Sub.textContent = `Najgorszy: ${formatLapMs(stats.worstMs)}`;
+          } else {
+            els.insight3Label.textContent =
+              stats.count >= 3 ? "Bez najgorszego" : "Najgorszy czas";
+            els.insight3Val.textContent =
+              stats.count >= 3
+                ? formatLapMs(ins.trimmedAvgMs)
+                : formatLapMs(stats.worstMs);
+            els.insight3Sub.className = "insight-sub tabular";
+            els.insight3Sub.textContent =
+              stats.count >= 3
+                ? `Najgorszy: ${formatLapMs(stats.worstMs)}`
+                : "Średnia po 3. pozycji";
+          }
+        }
+
+        function renderStageStats(stageStats) {
+          if (!stageStats) {
+            els.stageStatsCard.hidden = true;
+            return;
+          }
+          els.stageStatsCard.hidden = false;
+          els.stageIdealPill.textContent =
+            stageStats.idealCycleMs > 0
+              ? `Idealny cykl: ${formatLapMs(stageStats.idealCycleMs)}`
+              : `Cykle etapowe: ${stageStats.cycleCount}`;
+
+          const chips = [];
+          if (stageStats.bottleneck) {
+            chips.push(
+              `<span class="stage-highlight-chip">Najdłuższy etap: <strong>${escapeHtml(stageStats.bottleneck.name)}</strong> (${Math.round(stageStats.bottleneck.sharePct)}%)</span>`,
+            );
+          }
+          if (stageStats.mostVariable) {
+            chips.push(
+              `<span class="stage-highlight-chip">Największy rozrzut: <strong>${escapeHtml(stageStats.mostVariable.name)}</strong> (Δ ${formatShortMS(stageStats.mostVariable.spreadMs / 1000)})</span>`,
+            );
+          }
+          els.stageHighlights.innerHTML = chips.join("");
+
+          let bodyHtml = "";
+          for (let i = 0; i < stageStats.rows.length; i++) {
+            const r = stageStats.rows[i];
+            const trendHtml =
+              r.trend === "faster"
+                ? '<span class="stage-trend faster" title="Przyspiesza">↓</span>'
+                : r.trend === "slower"
+                  ? '<span class="stage-trend slower" title="Zwalnia">↑</span>'
+                  : "";
+            bodyHtml += `
+              <tr>
+                <td>
+                  <div class="stage-cell-name">
+                    <span class="legend-dot" style="background:${r.color}"></span>
+                    <span>${escapeHtml(r.name)}</span>
+                    <span class="stage-share">${Math.round(r.sharePct)}%</span>
+                  </div>
+                </td>
+                <td>${formatLapMs(r.avgMs)}${trendHtml}</td>
+                <td>${formatLapMs(r.medianMs)}</td>
+                <td>${formatShortMS(r.minMs / 1000)}–${formatShortMS(r.maxMs / 1000)}</td>
+              </tr>
+            `;
+          }
+          els.stageStatsBody.innerHTML = bodyHtml;
         }
 
         /* Odmiana słowa "pozycja" po liczbie */
@@ -2094,27 +2955,63 @@
         }
 
         /* Renderowanie minimalistycznego wykresu słupkowego w czystym SVG */
-        function renderSvgChart() {
+        function renderSvgChart(stageStats) {
           els.chartHoverInfo.textContent = "";
           const laps = state.laps;
           if (laps.length === 0) {
+            els.chartLegend.hidden = true;
             els.chartBox.innerHTML =
               '<div class="chart-empty">Zalicz pierwszą pozycję, aby zobaczyć wykres</div>';
             return;
           }
 
-          const isFlow = state.slowFlow;
+          if (!stageStats || stageStats.rows.length === 0) {
+            selectedStageFilter = null;
+            els.chartLegend.hidden = true;
+          } else {
+            if (
+              selectedStageFilter !== null &&
+              selectedStageFilter >= stageStats.rows.length
+            ) {
+              selectedStageFilter = null;
+            }
+            els.chartLegend.hidden = false;
+            els.chartLegend.innerHTML = stageStats.rows
+              .map((r) => {
+                const isSelected = selectedStageFilter === r.idx;
+                const isDimmed =
+                  selectedStageFilter !== null && !isSelected;
+                return `<button type="button" class="legend-pill${isSelected ? " active" : ""}${isDimmed ? " dimmed" : ""}" data-stage-filter="${r.idx}"><span class="legend-dot" style="background:${r.color}"></span><span>${escapeHtml(r.name)}</span></button>`;
+              })
+              .join("");
+          }
+
+          const isFlow = state.mode === "slowflow";
+          const filterIdx = selectedStageFilter;
+          const isSingleStageView = filterIdx !== null;
           const targetMs = state.targetSeconds * 1000;
-          const maxLapMs = Math.max(...laps.map((l) => l.durationMs));
-          const maxScaleMs = isFlow
-            ? Math.max(maxLapMs * 1.15, 60000)
-            : Math.max(targetMs * 1.25, maxLapMs * 1.1, 60000);
+
+          const displayValues = laps.map((l) => {
+            if (isSingleStageView) {
+              return l.stages && l.stages[filterIdx]
+                ? l.stages[filterIdx].durationMs
+                : 0;
+            }
+            return l.durationMs;
+          });
+
+          const maxLapMs = Math.max(...displayValues, 0);
+          const showTargetLine = !isFlow && !isSingleStageView;
+          const maxScaleMs = showTargetLine
+            ? Math.max(targetMs * 1.25, maxLapMs * 1.1, 60000)
+            : Math.max(maxLapMs * 1.15, 60000);
 
           const measuredW = Math.round(els.chartBox.clientWidth || 0);
           const vbW = measuredW >= 200 ? measuredW : 480;
           const vbH = 155;
           const needsHours =
-            (!isFlow && state.targetSeconds >= 3600) || maxScaleMs >= 3600000;
+            (showTargetLine && state.targetSeconds >= 3600) ||
+            maxScaleMs >= 3600000;
           const padLeft = needsHours ? 56 : 42;
           const padRight = 10;
           const padTop = 12;
@@ -2137,16 +3034,43 @@
           let hitsHtml = "";
           for (let i = 0; i < count; i++) {
             const lap = laps[i];
-            const barH = Math.max(2, (lap.durationMs / maxScaleMs) * plotH);
             const x = padLeft + i * step + (step - barW) / 2;
-            const y = padTop + plotH - barH;
-            const fill = isFlow
-              ? "#818cf8"
-              : lap.durationMs <= targetMs
-                ? "#22c55e"
-                : "#ef4444";
             const radius = barW > 8 ? 3 : 1.5;
-            barsHtml += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="${radius}" fill="${fill}" opacity="0.9"></rect>`;
+
+            if (isSingleStageView) {
+              const stageVal = displayValues[i];
+              if (stageVal > 0) {
+                const barH = Math.max(2, (stageVal / maxScaleMs) * plotH);
+                const y = padTop + plotH - barH;
+                const color = STAGE_COLORS[filterIdx % STAGE_COLORS.length];
+                barsHtml += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="${radius}" fill="${color}" opacity="0.92"></rect>`;
+              }
+            } else if (
+              !isFlow &&
+              Array.isArray(lap.stages) &&
+              lap.stages.length > 0
+            ) {
+              let currentBottomY = padTop + plotH;
+              for (let s = 0; s < lap.stages.length; s++) {
+                const segMs = lap.stages[s].durationMs;
+                const segH = Math.max(1, (segMs / maxScaleMs) * plotH);
+                const segY = Math.max(padTop, currentBottomY - segH);
+                const actualH = currentBottomY - segY;
+                const segColor = STAGE_COLORS[s % STAGE_COLORS.length];
+                barsHtml += `<rect x="${x.toFixed(1)}" y="${segY.toFixed(1)}" width="${barW.toFixed(1)}" height="${actualH.toFixed(1)}" rx="${s === lap.stages.length - 1 ? radius : 0}" fill="${segColor}" opacity="0.92"></rect>`;
+                currentBottomY = segY;
+              }
+            } else {
+              const barH = Math.max(2, (lap.durationMs / maxScaleMs) * plotH);
+              const y = padTop + plotH - barH;
+              const fill = isFlow
+                ? "#818cf8"
+                : lap.durationMs <= targetMs
+                  ? "#22c55e"
+                  : "#ef4444";
+              barsHtml += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="${radius}" fill="${fill}" opacity="0.9"></rect>`;
+            }
+
             hitsHtml += `<rect class="svg-hit" data-idx="${i}" x="${(padLeft + i * step).toFixed(1)}" y="${padTop}" width="${step.toFixed(1)}" height="${plotH}" fill="transparent" style="cursor:pointer"></rect>`;
           }
 
@@ -2161,11 +3085,12 @@
           }
 
           // Ukrywamy skrajne etykiety osi Y, jeśli nachodzą na etykietę progu docelowego
-          const showTopLabel = isFlow || Math.abs(targetY - padTop) >= 12;
+          const showTopLabel =
+            !showTargetLine || Math.abs(targetY - padTop) >= 12;
           const showBottomLabel =
-            isFlow || Math.abs(targetY - (padTop + plotH)) >= 12;
+            !showTargetLine || Math.abs(targetY - (padTop + plotH)) >= 12;
 
-          const targetOverlayHtml = isFlow
+          const targetOverlayHtml = !showTargetLine
             ? ""
             : `<!-- Przerywana linia progu docelowego -->
             <line x1="${padLeft}" y1="${targetY.toFixed(1)}" x2="${vbW - padRight}" y2="${targetY.toFixed(1)}" stroke="#3b82f6" stroke-width="1.6" stroke-dasharray="5 4" />
@@ -2203,7 +3128,12 @@
               const idx = parseInt(hit.getAttribute("data-idx"), 10);
               const lap = state.laps[idx];
               if (!lap) return;
-              if (isFlow) {
+              if (isSingleStageView) {
+                const st = lap.stages && lap.stages[filterIdx];
+                els.chartHoverInfo.textContent = st
+                  ? `#${idx + 1} (${st.name}): ${formatLapMs(st.durationMs)}`
+                  : `#${idx + 1}: brak etapu`;
+              } else if (isFlow) {
                 els.chartHoverInfo.textContent = `#${idx + 1}: ${formatLapMs(lap.durationMs)}`;
               } else {
                 const diffMs = targetMs - lap.durationMs;
@@ -2224,6 +3154,7 @@
             return;
           }
 
+          const isFlow = state.mode === "slowflow";
           const targetMs = state.targetSeconds * 1000;
           // Wyliczamy czasy narastające od początku
           const cumulative = [];
@@ -2238,20 +3169,47 @@
             const lap = laps[i];
             const diffMs = targetMs - lap.durationMs;
             const isPlus = diffMs >= 0;
+            const hasStages =
+              Array.isArray(lap.stages) && lap.stages.length > 0;
+            const isExpanded = hasStages && expandedLapIds.has(lap.id);
+
+            const itemWrap = document.createElement("div");
+            itemWrap.className = "lap-item";
 
             const row = document.createElement("div");
-            row.className = "lap-row tabular";
-            const diffHtml = state.slowFlow
+            row.className =
+              "lap-row tabular" + (hasStages ? " expandable" : "");
+            if (hasStages) {
+              row.setAttribute("data-toggle-lap", lap.id);
+            }
+            const diffHtml = isFlow
               ? ""
               : `<span class="lap-diff ${isPlus ? "plus" : "minus"}">${formatSignedMS(diffMs)}</span>`;
+            const expandHint = hasStages
+              ? ` <span style="color:var(--text-dim);font-size:0.74rem">${isExpanded ? "▴" : "▾"}</span>`
+              : "";
             row.innerHTML = `
-            <span class="lap-num">#${i + 1}</span>
+            <span class="lap-num">#${i + 1}${expandHint}</span>
             <span class="lap-time">${formatLapMs(lap.durationMs)}</span>
             <span class="lap-cum">${formatHMSCs(cumulative[i])}</span>
             ${diffHtml}
             <button class="row-del-btn" type="button" data-del-id="${escapeHtml(lap.id)}" aria-label="Usuń pomiar numer ${i + 1}" title="Usuń ten pomiar">x</button>
           `;
-            frag.appendChild(row);
+            itemWrap.appendChild(row);
+
+            if (isExpanded) {
+              const detail = document.createElement("div");
+              detail.className = "lap-stages-detail tabular";
+              detail.innerHTML = lap.stages
+                .map((st, sIdx) => {
+                  const color = STAGE_COLORS[sIdx % STAGE_COLORS.length];
+                  return `<span class="lap-stage-chip"><span class="legend-dot" style="background:${color}"></span><span>${escapeHtml(st.name)}:</span><strong>${formatLapMs(st.durationMs)}</strong></span>`;
+                })
+                .join("");
+              itemWrap.appendChild(detail);
+            }
+
+            frag.appendChild(itemWrap);
           }
 
           els.lapList.innerHTML = "";
@@ -2273,6 +3231,7 @@
           for (let i = 0; i < list.length; i++) {
             const item = list[i];
             const isFlowSession = item.mode === "slowflow";
+            const isStagesSession = item.mode === "stages";
             const balanceMs =
               item.count * item.targetSeconds * 1000 - item.totalMs;
             const balClass = balanceMs >= 0 ? "good" : "bad";
@@ -2283,7 +3242,9 @@
             const fourthStatClass = isFlowSession ? "" : ` ${balClass}`;
             const modeBadge = isFlowSession
               ? '<span class="history-mode-badge">Slow Flow</span>'
-              : "";
+              : isStagesSession
+                ? '<span class="history-mode-badge stages">Etapy</span>'
+                : "";
 
             const card = document.createElement("div");
             card.className = "history-item";
@@ -2351,6 +3312,8 @@
             state.status = "running";
             state.currentLapAccumulatedMs = 0;
             state.currentLapStartTs = nowTs;
+            state.currentStageIndex = 0;
+            state.currentCycleStages = [];
             triggerVibration(30);
             saveState();
             renderAllStatic();
@@ -2364,11 +3327,52 @@
             return;
           }
 
-          // Stan running: zaliczamy pozycję
-          const lapMs = getCurrentLapMs(nowTs);
+          const stageMs = getCurrentLapMs(nowTs);
+
+          if (state.mode === "stages") {
+            const stageCount = state.stageNames.length;
+            const safeIdx = Math.max(
+              0,
+              Math.min(stageCount - 1, state.currentStageIndex),
+            );
+            state.currentCycleStages.push({
+              name: state.stageNames[safeIdx],
+              durationMs: stageMs,
+            });
+            state.currentLapAccumulatedMs = 0;
+            state.currentLapStartTs = nowTs;
+
+            if (safeIdx < stageCount - 1) {
+              state.currentStageIndex = safeIdx + 1;
+            } else {
+              let cycleTotalMs = 0;
+              for (let i = 0; i < state.currentCycleStages.length; i++) {
+                cycleTotalMs += state.currentCycleStages[i].durationMs;
+              }
+              state.laps.push({
+                id: `${nowTs}_${Math.random().toString(36).slice(2, 7)}`,
+                durationMs: cycleTotalMs,
+                stages: state.currentCycleStages.slice(),
+              });
+              state.currentCycleStages = [];
+              state.currentStageIndex = 0;
+            }
+
+            if (state.doubleTapGuard) {
+              lockoutUntil = nowTs + LOCKOUT_MS;
+            }
+            triggerVibration(30);
+            saveState();
+            renderAllStatic();
+            updateLiveDisplay(nowTs);
+            ensureLoop();
+            return;
+          }
+
+          // Stan running (Cel / Slow Flow): zaliczamy pozycję
           state.laps.push({
             id: `${nowTs}_${Math.random().toString(36).slice(2, 7)}`,
-            durationMs: lapMs,
+            durationMs: stageMs,
           });
           state.currentLapAccumulatedMs = 0;
           state.currentLapStartTs = nowTs;
@@ -2408,13 +3412,56 @@
         }
 
         function handleUndoLast() {
-          if (state.laps.length === 0) return;
           const nowTs = Date.now();
-          const removed = state.laps.pop();
+          if (state.mode === "stages" && state.currentCycleStages.length > 0) {
+            const removedStage = state.currentCycleStages.pop();
+            state.currentStageIndex = Math.max(
+              0,
+              Math.min(
+                state.stageNames.length - 1,
+                state.currentCycleStages.length,
+              ),
+            );
+            if (state.status === "running" || state.status === "paused") {
+              state.currentLapAccumulatedMs += removedStage.durationMs;
+            }
+            lockoutUntil = 0;
+            saveState();
+            renderAllStatic();
+            updateLiveDisplay(nowTs);
+            showToast(
+              `Cofnięto etap "${removedStage.name}" (${formatLapMs(removedStage.durationMs)})`,
+            );
+            return;
+          }
 
-          // Przywracamy czas cofniętej pozycji do bieżącego okrążenia, jeśli sesja jest aktywna
-          if (state.status === "running" || state.status === "paused") {
-            state.currentLapAccumulatedMs += removed.durationMs;
+          if (state.laps.length === 0) return;
+          const removed = state.laps.pop();
+          expandedLapIds.delete(removed.id);
+
+          if (
+            state.mode === "stages" &&
+            Array.isArray(removed.stages) &&
+            removed.stages.length >= 2
+          ) {
+            const lastStage = removed.stages[removed.stages.length - 1];
+            state.currentCycleStages = removed.stages.slice(0, -1);
+            state.currentStageIndex = Math.min(
+              state.stageNames.length - 1,
+              state.currentCycleStages.length,
+            );
+            if (state.status === "running" || state.status === "paused") {
+              state.currentLapAccumulatedMs += lastStage.durationMs;
+            }
+          } else {
+            if (state.mode === "stages") {
+              state.currentCycleStages = [];
+              state.currentStageIndex = 0;
+            }
+            // Przywracamy czas cofniętej pozycji do bieżącego okrążenia, jeśli sesja jest aktywna
+            if (state.status === "running" || state.status === "paused") {
+              state.currentLapAccumulatedMs += removed.durationMs;
+            }
           }
 
           lockoutUntil = 0;
@@ -2430,6 +3477,7 @@
           const idx = state.laps.findIndex((l) => l.id === lapId);
           if (idx === -1) return;
           const removed = state.laps.splice(idx, 1)[0];
+          expandedLapIds.delete(lapId);
           saveState();
           renderAllStatic();
           updateLiveDisplay(Date.now());
@@ -2447,7 +3495,10 @@
               : "Nie zaliczono jeszcze żadnej ukończonej pozycji. Możesz wyzerować stoper.";
 
           const activeLapMs =
-            state.status !== "idle" ? getCurrentLapMs(Date.now()) : 0;
+            state.status !== "idle"
+              ? getCurrentLapMs(Date.now()) +
+                (state.mode === "stages" ? getActiveCycleFinishedStagesMs() : 0)
+              : 0;
           const note =
             stats.count > 0 && activeLapMs >= 1000
               ? `Bieżąca, niezakończona pozycja (${formatShortMS(activeLapMs / 1000)}) nie zostanie dołączona do zapisanej sesji.`
@@ -2496,7 +3547,7 @@
           const record = {
             id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
             dateLabel,
-            mode: state.slowFlow ? "slowflow" : "target",
+            mode: state.mode,
             count: stats.count,
             totalMs: stats.completedTotalMs,
             avgMs: stats.avgMs,
@@ -2504,7 +3555,16 @@
             ratePerHour: stats.ratePerHour,
             bestMs: stats.bestMs,
             targetSeconds: state.targetSeconds,
-            laps: state.laps.map((l) => ({ durationMs: l.durationMs })),
+            laps: state.laps.map((l) => {
+              const out = { durationMs: l.durationMs };
+              if (Array.isArray(l.stages) && l.stages.length > 0) {
+                out.stages = l.stages.map((s) => ({
+                  name: s.name,
+                  durationMs: s.durationMs,
+                }));
+              }
+              return out;
+            }),
           };
 
           state.history.unshift(record);
@@ -2515,6 +3575,10 @@
           state.laps = [];
           state.currentLapStartTs = null;
           state.currentLapAccumulatedMs = 0;
+          state.currentStageIndex = 0;
+          state.currentCycleStages = [];
+          expandedLapIds.clear();
+          selectedStageFilter = null;
           lockoutUntil = 0;
           saveState();
           renderAllStatic();
@@ -2530,7 +3594,14 @@
             const nr = String(i + 1).padStart(3, " ");
             const lapStr = formatHMSCs(laps[i].durationMs);
             const cumStr = formatHMSCs(sum);
-            lines.push(`${nr}   ${lapStr}   ${cumStr}`);
+            let extra = "";
+            if (Array.isArray(laps[i].stages) && laps[i].stages.length > 0) {
+              const parts = laps[i].stages.map(
+                (s) => `${s.name}: ${formatLapMs(s.durationMs)}`,
+              );
+              extra = `   [${parts.join(" | ")}]`;
+            }
+            lines.push(`${nr}   ${lapStr}   ${cumStr}${extra}`);
           }
           return lines.join("\n");
         }
@@ -2582,21 +3653,52 @@
         function exportCsv() {
           if (state.laps.length === 0) return;
           const targetMs = state.targetSeconds * 1000;
-          const rows = [
-            state.slowFlow
-              ? "Nr;Czas pozycji;Czas laczny;Sekundy"
-              : "Nr;Czas pozycji;Czas laczny;Sekundy;Bilans wzgledem progu",
-          ];
+          const isFlow = state.mode === "slowflow";
+
+          let maxStages = 0;
+          const stageHeaders = [];
+          for (let i = 0; i < state.laps.length; i++) {
+            const st = state.laps[i].stages;
+            if (Array.isArray(st) && st.length > maxStages) {
+              maxStages = st.length;
+            }
+          }
+          for (let s = 0; s < maxStages; s++) {
+            let label = state.stageNames[s] || `Etap ${s + 1}`;
+            for (let i = state.laps.length - 1; i >= 0; i--) {
+              if (state.laps[i].stages && state.laps[i].stages[s]) {
+                label = state.laps[i].stages[s].name;
+                break;
+              }
+            }
+            stageHeaders.push(`"${label.replace(/"/g, '""')}"`);
+          }
+
+          const headCols = ["Nr", ...stageHeaders, "Czas pozycji", "Czas laczny", "Sekundy"];
+          if (!isFlow) headCols.push("Bilans wzgledem progu");
+          const rows = [headCols.join(";")];
           let sum = 0;
 
           for (let i = 0; i < state.laps.length; i++) {
-            const d = state.laps[i].durationMs;
+            const lap = state.laps[i];
+            const d = lap.durationMs;
             sum += d;
             const centiSec = (Math.floor(d / 10) / 100)
               .toFixed(2)
               .replace(".", ",");
-            const cols = [i + 1, formatHMSCs(d), formatHMSCs(sum), centiSec];
-            if (!state.slowFlow) {
+            const stageCols = [];
+            for (let s = 0; s < maxStages; s++) {
+              const st = lap.stages && lap.stages[s];
+              stageCols.push(st ? formatHMSCs(st.durationMs) : "");
+            }
+            const cols = [
+              i + 1,
+              ...stageCols,
+              formatHMSCs(d),
+              formatHMSCs(sum),
+              centiSec,
+            ];
+            if (!isFlow) {
               const diff = targetMs - d;
               cols.push(`" ${formatSignedMS(diff)}"`);
             }
@@ -2657,16 +3759,123 @@
         }
 
         /* Obsługa zdarzeń */
-        els.slowFlowBtn.addEventListener("click", () => {
-          state.slowFlow = !state.slowFlow;
+        function setMode(nextMode) {
+          if (!["target", "slowflow", "stages"].includes(nextMode)) return;
+          if (nextMode === state.mode) return;
+
+          if (state.mode === "stages" && nextMode !== "stages") {
+            if (state.currentCycleStages.length > 0) {
+              state.currentLapAccumulatedMs += getActiveCycleFinishedStagesMs();
+              state.currentCycleStages = [];
+            }
+            state.currentStageIndex = 0;
+          }
+
+          state.mode = nextMode;
+          selectedStageFilter = null;
           saveState();
           renderAllStatic();
           updateLiveDisplay(Date.now());
-          showToast(
-            state.slowFlow
-              ? "Tryb Slow Flow włączony — praca bez progu"
-              : "Tryb Slow Flow wyłączony — powrót do progu",
-          );
+
+          const msg =
+            nextMode === "slowflow"
+              ? "Tryb Slow Flow — praca bez progu"
+              : nextMode === "stages"
+                ? `Tryb etapowy — ${state.stageNames.length} ${pluralEtap(state.stageNames.length)} w cyklu`
+                : "Tryb Cel — pomiar z progiem docelowym";
+          showToast(msg);
+        }
+
+        els.modeSwitch.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-mode]");
+          if (!btn) return;
+          setMode(btn.getAttribute("data-mode"));
+        });
+
+        els.stageEditorList.addEventListener("input", (e) => {
+          const input = e.target.closest("[data-stage-name]");
+          if (!input) return;
+          const idx = parseInt(input.getAttribute("data-stage-name"), 10);
+          if (isNaN(idx) || idx < 0 || idx >= state.stageNames.length) return;
+          const val = input.value.trim();
+          state.stageNames[idx] = val ? val.slice(0, 28) : `Etap ${idx + 1}`;
+          saveState();
+          updateLiveDisplay(Date.now());
+          syncGoalInputs("all");
+        });
+
+        els.stageEditorList.addEventListener("blur", (e) => {
+          const input = e.target.closest("[data-stage-name]");
+          if (!input) return;
+          const idx = parseInt(input.getAttribute("data-stage-name"), 10);
+          if (isNaN(idx) || idx < 0 || idx >= state.stageNames.length) return;
+          input.value = state.stageNames[idx];
+          renderAllStatic();
+        }, true);
+
+        els.stageEditorList.addEventListener("click", (e) => {
+          const upBtn = e.target.closest("[data-stage-up]");
+          if (upBtn) {
+            const idx = parseInt(upBtn.getAttribute("data-stage-up"), 10);
+            if (idx > 0 && idx < state.stageNames.length) {
+              const tmp = state.stageNames[idx - 1];
+              state.stageNames[idx - 1] = state.stageNames[idx];
+              state.stageNames[idx] = tmp;
+              saveState();
+              renderAllStatic();
+              updateLiveDisplay(Date.now());
+            }
+            return;
+          }
+
+          const downBtn = e.target.closest("[data-stage-down]");
+          if (downBtn) {
+            const idx = parseInt(downBtn.getAttribute("data-stage-down"), 10);
+            if (idx >= 0 && idx < state.stageNames.length - 1) {
+              const tmp = state.stageNames[idx + 1];
+              state.stageNames[idx + 1] = state.stageNames[idx];
+              state.stageNames[idx] = tmp;
+              saveState();
+              renderAllStatic();
+              updateLiveDisplay(Date.now());
+            }
+            return;
+          }
+
+          const delBtn = e.target.closest("[data-stage-del]");
+          if (delBtn) {
+            const idx = parseInt(delBtn.getAttribute("data-stage-del"), 10);
+            if (
+              state.stageNames.length <= 2 ||
+              idx < 0 ||
+              idx >= state.stageNames.length
+            ) {
+              return;
+            }
+            state.stageNames.splice(idx, 1);
+            if (state.currentStageIndex >= state.stageNames.length) {
+              state.currentStageIndex = state.stageNames.length - 1;
+            }
+            saveState();
+            renderAllStatic();
+            updateLiveDisplay(Date.now());
+          }
+        });
+
+        els.addStageBtn.addEventListener("click", () => {
+          if (state.stageNames.length >= 8) return;
+          state.stageNames.push(`Etap ${state.stageNames.length + 1}`);
+          saveState();
+          renderAllStatic();
+          updateLiveDisplay(Date.now());
+        });
+
+        els.chartLegend.addEventListener("click", (e) => {
+          const pill = e.target.closest("[data-stage-filter]");
+          if (!pill) return;
+          const idx = parseInt(pill.getAttribute("data-stage-filter"), 10);
+          selectedStageFilter = selectedStageFilter === idx ? null : idx;
+          renderSvgChart(computeStageStats());
         });
 
         els.goalToggleBtn.addEventListener("click", () => {
@@ -2715,12 +3924,24 @@
 
         els.exportCsvBtn.addEventListener("click", exportCsv);
 
-        // Delegacja usuwania pojedynczego pomiaru
+        // Delegacja usuwania i rozwijania pojedynczego pomiaru
         els.lapList.addEventListener("click", (e) => {
           const btn = e.target.closest("[data-del-id]");
-          if (!btn) return;
-          const lapId = btn.getAttribute("data-del-id");
-          deleteSingleLap(lapId);
+          if (btn) {
+            const lapId = btn.getAttribute("data-del-id");
+            deleteSingleLap(lapId);
+            return;
+          }
+          const toggleRow = e.target.closest("[data-toggle-lap]");
+          if (toggleRow) {
+            const lapId = toggleRow.getAttribute("data-toggle-lap");
+            if (expandedLapIds.has(lapId)) {
+              expandedLapIds.delete(lapId);
+            } else {
+              expandedLapIds.add(lapId);
+            }
+            renderLapList();
+          }
         });
 
         // Zwijanie / rozwijanie historii

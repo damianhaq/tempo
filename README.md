@@ -9,6 +9,7 @@ Lekka aplikacja webowa (PWA) w czystym HTML, CSS i JavaScript do mierzenia tempa
 - **Zsynchronizowany próg docelowy:** ustawianie celu jako czasu na jedną pozycję (np. `06:00`) albo liczby pozycji na godzinę (np. `10,0/h`) — oba parametry przeliczają się automatycznie.
 - **Bilans na żywo (+/-):** bieżąca informacja o zapasie lub stracie czasu względem zadanego progu oraz pasek postępu dla aktualnej pozycji.
 - **Tryb Slow Flow:** spokojny tryb pracy bez progu docelowego, bez oceniania kolorami (zielony/czerwony) i z licznikiem `MM:SS` bez setnych sekundy — z pełnym zapisem wszystkich statystyk i historii.
+- **Tryb etapowy (Etapy):** podział pojedynczego cyklu na 2–8 konfigurowalnych etapów z jednoczesnym podglądem czasu bieżącego etapu oraz całego cyklu, wykresem warstwowym SVG, analizą wąskich gardeł, rozrzutu i wyliczeniem „idealnego cyklu”.
 - **Przycisk pod kciuk z zabezpieczeniem:** duży obszar kliknięcia, krótka wibracja i opcjonalna blokada 1,5 s chroniąca przed przypadkowym podwójnym tapnięciem.
 - **Szybka korekta pomiarów:** usuwanie pojedynczych błędnych wpisów z listy oraz cofanie ostatniej pozycji z przywróceniem jej czasu do bieżącego okrążenia.
 - **Statystyki i wykres:** średnia, mediana, tempo na godzinę, najkrótszy i najdłuższy czas oraz podgląd przebiegu sesji na wykresie SVG.
