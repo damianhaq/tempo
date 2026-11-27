@@ -1450,6 +1450,7 @@
         font-size: 0.84rem;
         font-weight: 700;
         color: var(--text);
+        white-space: nowrap;
       }
 
       .history-date-wrap {
@@ -1536,6 +1537,227 @@
         display: flex;
         gap: 6px;
         align-items: center;
+        flex-shrink: 0;
+      }
+
+      .history-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 8px 10px;
+      }
+
+      .history-toolbar-hint {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-dim);
+      }
+
+      .history-toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .history-content {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .history-period-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .history-period-header,
+      .history-day-header {
+        width: 100%;
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        cursor: pointer;
+        touch-action: manipulation;
+        text-align: left;
+      }
+
+      .history-period-header {
+        background: var(--card-elevated);
+        border: 1px solid var(--border);
+        padding: 8px 11px;
+      }
+
+      .history-period-header:hover {
+        border-color: var(--border-strong);
+      }
+
+      .history-group-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        min-width: 0;
+      }
+
+      .history-period-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .history-group-meta {
+        font-size: 0.73rem;
+        font-weight: 600;
+        color: var(--text-muted);
+      }
+
+      .history-period-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .history-day-group {
+        background: rgba(14, 16, 20, 0.55);
+        border: 1px solid var(--border-strong);
+        border-left: 3px solid var(--blue);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+      }
+
+      .history-day-header {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 9px 11px;
+      }
+
+      .history-day-header:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .history-day-title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .history-day-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 9px;
+        border-top: 1px solid var(--border);
+      }
+
+      .history-expand-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        border: 1px solid var(--border-strong);
+        background: var(--card-elevated);
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        touch-action: manipulation;
+        transition:
+          transform 0.2s,
+          border-color 0.15s,
+          color 0.15s;
+      }
+
+      .history-expand-btn:hover {
+        border-color: var(--blue);
+        color: var(--text);
+      }
+
+      .history-expand-btn.open {
+        transform: rotate(180deg);
+        color: var(--text);
+      }
+
+      .history-item-stats.clickable {
+        cursor: pointer;
+      }
+
+      .history-details {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border);
+      }
+
+      .history-detail-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .history-detail-subtitle {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-dim);
+      }
+
+      .history-stage-block {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-top: 2px;
+      }
+
+      .history-laps-list {
+        max-height: 210px;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--card);
+        padding: 2px 8px;
+      }
+
+      .history-lap-item {
+        border-bottom: 1px solid rgba(38, 43, 54, 0.55);
+      }
+
+      .history-lap-item:last-child {
+        border-bottom: none;
+      }
+
+      .history-lap-row {
+        display: grid;
+        grid-template-columns: minmax(28px, auto) minmax(0, 1fr) minmax(0, 1fr) minmax(56px, auto);
+        gap: 6px;
+        align-items: center;
+        padding: 7px 2px;
+        font-size: 0.81rem;
+      }
+
+      .history-lap-row.slow-flow {
+        grid-template-columns: minmax(28px, auto) minmax(0, 1fr) minmax(0, 1fr);
+      }
+
+      .history-laps-list .lap-stages-detail {
+        padding: 0 2px 7px 36px;
       }
 
       /* Okno dialogowe (zamiast confirm/alert) */
@@ -2003,7 +2225,31 @@
           <span id="historyChevron" class="chevron" aria-hidden="true">v</span>
         </button>
         <div id="historyBody" class="history-body">
-          <div class="empty-msg">Brak zapisanych sesji w historii</div>
+          <div class="history-toolbar">
+            <span class="history-toolbar-hint">Kopia zapasowa (JSON)</span>
+            <div class="history-toolbar-actions">
+              <button id="historyImportBtn" class="mini-btn" type="button">
+                Importuj
+              </button>
+              <button
+                id="historyExportBtn"
+                class="mini-btn"
+                type="button"
+                disabled
+              >
+                Eksportuj
+              </button>
+              <input
+                id="historyImportInput"
+                type="file"
+                accept=".json,application/json,text/plain"
+                hidden
+              />
+            </div>
+          </div>
+          <div id="historyContent" class="history-content">
+            <div class="empty-msg">Brak zapisanych sesji w historii</div>
+          </div>
         </div>
       </section>
     </div>
@@ -2074,6 +2320,9 @@
         let chartResizeTimer = null;
         let selectedStageFilter = null;
         const expandedLapIds = new Set();
+        const expandedHistoryIds = new Set();
+        const userToggledHistoryPeriods = new Map();
+        const userToggledHistoryDays = new Map();
 
         /* Referencje do elementów DOM */
         const els = {
@@ -2161,6 +2410,10 @@
           historyCountBadge: document.getElementById("historyCountBadge"),
           historyChevron: document.getElementById("historyChevron"),
           historyBody: document.getElementById("historyBody"),
+          historyContent: document.getElementById("historyContent"),
+          historyImportBtn: document.getElementById("historyImportBtn"),
+          historyExportBtn: document.getElementById("historyExportBtn"),
+          historyImportInput: document.getElementById("historyImportInput"),
 
           modalBackdrop: document.getElementById("modalBackdrop"),
           modalTitle: document.getElementById("modalTitle"),
@@ -2210,11 +2463,13 @@
 
         function sanitizeHistoryItem(item) {
           if (!item || typeof item !== "object") return null;
-          if (typeof item.id !== "string" || !item.id) return null;
-          if (typeof item.dateLabel !== "string") return null;
+          if (typeof item.id !== "string" || !item.id.trim()) return null;
+          if (typeof item.dateLabel !== "string" || !item.dateLabel.trim()) {
+            return null;
+          }
           if (
             typeof item.count !== "number" ||
-            !Number.isFinite(item.count) ||
+            !Number.isInteger(item.count) ||
             item.count <= 0
           ) {
             return null;
@@ -2255,9 +2510,36 @@
           const mode = ["target", "slowflow", "stages"].includes(item.mode)
             ? item.mode
             : "target";
+          const createdAt =
+            typeof item.createdAt === "number" &&
+            Number.isFinite(item.createdAt) &&
+            item.createdAt > 0
+              ? item.createdAt
+              : undefined;
+          const medianMs =
+            typeof item.medianMs === "number" &&
+            Number.isFinite(item.medianMs) &&
+            item.medianMs >= 0
+              ? item.medianMs
+              : undefined;
+          const bestMs =
+            typeof item.bestMs === "number" &&
+            Number.isFinite(item.bestMs) &&
+            item.bestMs >= 0
+              ? item.bestMs
+              : undefined;
           return {
-            ...item,
+            id: item.id.trim().slice(0, 64),
+            ...(createdAt !== undefined ? { createdAt } : {}),
+            dateLabel: item.dateLabel.trim().slice(0, 40),
             mode,
+            count: validLaps.length,
+            totalMs: item.totalMs,
+            avgMs: item.avgMs,
+            ...(medianMs !== undefined ? { medianMs } : {}),
+            ratePerHour: item.ratePerHour,
+            ...(bestMs !== undefined ? { bestMs } : {}),
+            targetSeconds: item.targetSeconds,
             laps: validLaps,
           };
         }
@@ -2547,8 +2829,11 @@
           };
         }
 
-        function computeStageStats() {
-          const stageLaps = state.laps.filter(
+        function computeStageStats(
+          laps = state.laps,
+          useCurrentNames = state.mode === "stages",
+        ) {
+          const stageLaps = laps.filter(
             (l) => Array.isArray(l.stages) && l.stages.length > 0,
           );
           if (stageLaps.length === 0) return null;
@@ -2592,7 +2877,7 @@
             }
 
             const name =
-              state.mode === "stages" && state.stageNames[idx]
+              useCurrentNames && state.stageNames[idx]
                 ? state.stageNames[idx]
                 : lastSeenName || `Etap ${idx + 1}`;
             const avgMs = sum / durations.length;
@@ -3146,30 +3431,7 @@
           }
         }
 
-        function renderStageStats(stageStats) {
-          if (state.mode === "slowflow" || !stageStats) {
-            els.stageStatsCard.hidden = true;
-            return;
-          }
-          els.stageStatsCard.hidden = false;
-          els.stageIdealPill.textContent =
-            stageStats.idealCycleMs > 0
-              ? `Idealny cykl: ${formatLapMs(stageStats.idealCycleMs)}`
-              : `Cykle etapowe: ${stageStats.cycleCount}`;
-
-          const chips = [];
-          if (stageStats.bottleneck) {
-            chips.push(
-              `<span class="stage-highlight-chip">Najdłuższy etap: <strong>${escapeHtml(stageStats.bottleneck.name)}</strong> (${Math.round(stageStats.bottleneck.sharePct)}%)</span>`,
-            );
-          }
-          if (stageStats.mostVariable) {
-            chips.push(
-              `<span class="stage-highlight-chip">Największy rozrzut: <strong>${escapeHtml(stageStats.mostVariable.name)}</strong> (Δ ${formatShortMS(stageStats.mostVariable.spreadMs / 1000)})</span>`,
-            );
-          }
-          els.stageHighlights.innerHTML = chips.join("");
-
+        function buildStageStatsRowsHtml(stageStats) {
           let bodyHtml = "";
           for (let i = 0; i < stageStats.rows.length; i++) {
             const r = stageStats.rows[i];
@@ -3194,7 +3456,33 @@
               </tr>
             `;
           }
-          els.stageStatsBody.innerHTML = bodyHtml;
+          return bodyHtml;
+        }
+
+        function renderStageStats(stageStats) {
+          if (state.mode === "slowflow" || !stageStats) {
+            els.stageStatsCard.hidden = true;
+            return;
+          }
+          els.stageStatsCard.hidden = false;
+          els.stageIdealPill.textContent =
+            stageStats.idealCycleMs > 0
+              ? `Idealny cykl: ${formatLapMs(stageStats.idealCycleMs)}`
+              : `Cykle etapowe: ${stageStats.cycleCount}`;
+
+          const chips = [];
+          if (stageStats.bottleneck) {
+            chips.push(
+              `<span class="stage-highlight-chip">Najdłuższy etap: <strong>${escapeHtml(stageStats.bottleneck.name)}</strong> (${Math.round(stageStats.bottleneck.sharePct)}%)</span>`,
+            );
+          }
+          if (stageStats.mostVariable) {
+            chips.push(
+              `<span class="stage-highlight-chip">Największy rozrzut: <strong>${escapeHtml(stageStats.mostVariable.name)}</strong> (Δ ${formatShortMS(stageStats.mostVariable.spreadMs / 1000)})</span>`,
+            );
+          }
+          els.stageHighlights.innerHTML = chips.join("");
+          els.stageStatsBody.innerHTML = buildStageStatsRowsHtml(stageStats);
         }
 
         /* Odmiana słowa "pozycja" po liczbie */
@@ -3466,50 +3754,379 @@
           els.lapList.appendChild(frag);
         }
 
-        /* Renderowanie historii sesji */
-        function renderHistory() {
-          const list = state.history;
-          els.historyCountBadge.textContent = String(list.length);
+        const MONTH_NAMES_PL = [
+          "Styczeń",
+          "Luty",
+          "Marzec",
+          "Kwiecień",
+          "Maj",
+          "Czerwiec",
+          "Lipiec",
+          "Sierpień",
+          "Wrzesień",
+          "Październik",
+          "Listopad",
+          "Grudzień",
+        ];
+        const WEEKDAYS_SHORT_PL = ["Nd", "Pon", "Wt", "Śr", "Czw", "Pt", "Sob"];
 
-          if (list.length === 0) {
-            els.historyBody.innerHTML =
-              '<div class="empty-msg">Brak zapisanych sesji w historii</div>';
-            return;
+        function formatSessionCount(n, accusative = false) {
+          const mod10 = n % 10;
+          const mod100 = n % 100;
+          if (n === 1) return accusative ? "1 sesję" : "1 sesja";
+          if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+            return `${n} sesje`;
+          }
+          return `${n} sesji`;
+        }
+
+        function parseHistoryDate(item) {
+          if (item && typeof item.dateLabel === "string") {
+            const m = item.dateLabel
+              .trim()
+              .match(/^(\d{2})\.(\d{2})\.(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
+            if (m) {
+              const day = Number(m[1]);
+              const month = Number(m[2]);
+              const year = Number(m[3]);
+              const hour = m[4] !== undefined ? Number(m[4]) : 0;
+              const min = m[5] !== undefined ? Number(m[5]) : 0;
+              const d = new Date(year, month - 1, day, hour, min, 0, 0);
+              if (
+                d.getFullYear() === year &&
+                d.getMonth() === month - 1 &&
+                d.getDate() === day
+              ) {
+                if (
+                  typeof item.createdAt === "number" &&
+                  Number.isFinite(item.createdAt)
+                ) {
+                  const cd = new Date(item.createdAt);
+                  if (
+                    cd.getFullYear() === year &&
+                    cd.getMonth() === month - 1 &&
+                    cd.getDate() === day &&
+                    cd.getHours() === hour &&
+                    cd.getMinutes() === min
+                  ) {
+                    return cd;
+                  }
+                }
+                return d;
+              }
+            }
+          }
+          if (
+            item &&
+            typeof item.createdAt === "number" &&
+            Number.isFinite(item.createdAt) &&
+            item.createdAt > 0
+          ) {
+            return new Date(item.createdAt);
+          }
+          if (item && typeof item.id === "string") {
+            const mId = item.id.match(/^hist_(\d+)/);
+            if (mId) {
+              const ts = Number(mId[1]);
+              if (Number.isFinite(ts) && ts > 0) return new Date(ts);
+            }
+          }
+          return null;
+        }
+
+        function sortHistoryNewestFirst(list) {
+          return [...list].sort((a, b) => {
+            const da = parseHistoryDate(a);
+            const db = parseHistoryDate(b);
+            const ta = da ? da.getTime() : 0;
+            const tb = db ? db.getTime() : 0;
+            return tb - ta;
+          });
+        }
+
+        function getStartOfDay(d) {
+          return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+
+        function getStartOfWeekMon(d) {
+          const dayIdx = (d.getDay() + 6) % 7;
+          return new Date(d.getFullYear(), d.getMonth(), d.getDate() - dayIdx);
+        }
+
+        function formatDayKey(d) {
+          return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+        }
+
+        function formatHistoryDayLabel(d, todayStart, yesterdayStart) {
+          const dayStart = getStartOfDay(d);
+          const dateStr = `${pad2(d.getDate())}.${pad2(d.getMonth() + 1)}.${d.getFullYear()}`;
+          if (dayStart.getTime() === todayStart.getTime()) {
+            return `Dzisiaj · ${dateStr}`;
+          }
+          if (dayStart.getTime() === yesterdayStart.getTime()) {
+            return `Wczoraj · ${dateStr}`;
+          }
+          return `${WEEKDAYS_SHORT_PL[d.getDay()]} · ${dateStr}`;
+        }
+
+        function groupHistorySessions(list, now = new Date()) {
+          const sorted = sortHistoryNewestFirst(list);
+          const todayStart = getStartOfDay(now);
+          const yesterdayStart = new Date(
+            todayStart.getFullYear(),
+            todayStart.getMonth(),
+            todayStart.getDate() - 1,
+          );
+          const thisWeekStart = getStartOfWeekMon(todayStart);
+          const lastWeekStart = new Date(
+            thisWeekStart.getFullYear(),
+            thisWeekStart.getMonth(),
+            thisWeekStart.getDate() - 7,
+          );
+
+          const periodMap = new Map();
+          for (let i = 0; i < sorted.length; i++) {
+            const item = sorted[i];
+            const d = parseHistoryDate(item);
+
+            let periodKey = "other";
+            let periodTitle = "Pozostałe";
+            let dayKey = `unknown:${item.id}`;
+            let dayLabel = item.dateLabel || "Nieznana data";
+
+            if (d) {
+              const dWeekStart = getStartOfWeekMon(d);
+              if (dWeekStart.getTime() === thisWeekStart.getTime()) {
+                periodKey = "week:current";
+                periodTitle = "Ten tydzień";
+              } else if (dWeekStart.getTime() === lastWeekStart.getTime()) {
+                periodKey = "week:previous";
+                periodTitle = "Poprzedni tydzień";
+              } else {
+                const y = d.getFullYear();
+                const m = d.getMonth();
+                periodKey = `month:${y}-${pad2(m + 1)}`;
+                periodTitle = `${MONTH_NAMES_PL[m]} ${y}`;
+              }
+              dayKey = formatDayKey(d);
+              dayLabel = formatHistoryDayLabel(d, todayStart, yesterdayStart);
+            }
+
+            if (!periodMap.has(periodKey)) {
+              periodMap.set(periodKey, {
+                key: periodKey,
+                title: periodTitle,
+                totalCount: 0,
+                totalPositions: 0,
+                totalMs: 0,
+                dayMap: new Map(),
+              });
+            }
+            const period = periodMap.get(periodKey);
+            period.totalCount += 1;
+            period.totalPositions += item.count;
+            period.totalMs += item.totalMs;
+
+            if (!period.dayMap.has(dayKey)) {
+              period.dayMap.set(dayKey, {
+                key: dayKey,
+                label: dayLabel,
+                isToday: d
+                  ? getStartOfDay(d).getTime() === todayStart.getTime()
+                  : false,
+                items: [],
+                totalPositions: 0,
+                totalMs: 0,
+              });
+            }
+            const dayGroup = period.dayMap.get(dayKey);
+            dayGroup.items.push(item);
+            dayGroup.totalPositions += item.count;
+            dayGroup.totalMs += item.totalMs;
           }
 
-          const frag = document.createDocumentFragment();
-          for (let i = 0; i < list.length; i++) {
-            const item = list[i];
-            const isFlowSession = item.mode === "slowflow";
-            const isStagesSession = item.mode === "stages";
-            const balanceMs =
-              item.count * item.targetSeconds * 1000 - item.totalMs;
-            const balClass = balanceMs >= 0 ? "good" : "bad";
-            const fourthStatLabel = isFlowSession ? "Czas łączny" : "Bilans";
-            const fourthStatValue = isFlowSession
-              ? formatHMS(item.totalMs)
-              : formatSignedMS(balanceMs);
-            const fourthStatClass = isFlowSession ? "" : ` ${balClass}`;
-            const modeBadge = isFlowSession
-              ? '<span class="history-mode-badge">Slow Flow</span>'
-              : isStagesSession
-                ? '<span class="history-mode-badge stages">Etapy</span>'
-                : "";
+          return Array.from(periodMap.values()).map((p) => ({
+            key: p.key,
+            title: p.title,
+            totalCount: p.totalCount,
+            totalPositions: p.totalPositions,
+            totalMs: p.totalMs,
+            days: Array.from(p.dayMap.values()),
+          }));
+        }
 
-            const card = document.createElement("div");
-            card.className = "history-item";
-            card.innerHTML = `
+        function buildHistoryDetailsHtml(item) {
+          const safeId = escapeHtml(item.id);
+          const isFlowSession = item.mode === "slowflow";
+          const targetMs = item.targetSeconds * 1000;
+
+          const durations = item.laps
+            .map((l) => l.durationMs)
+            .sort((a, b) => a - b);
+          const mid = Math.floor(durations.length / 2);
+          const fallbackMedianMs =
+            durations.length % 2 === 1
+              ? durations[mid]
+              : (durations[mid - 1] + durations[mid]) / 2;
+          const medianMs =
+            typeof item.medianMs === "number" && Number.isFinite(item.medianMs)
+              ? item.medianMs
+              : fallbackMedianMs;
+          const bestMs =
+            typeof item.bestMs === "number" && Number.isFinite(item.bestMs)
+              ? item.bestMs
+              : durations[0];
+          const worstMs = durations[durations.length - 1];
+
+          const extraStatsHtml = isFlowSession
+            ? `
+              <div class="h-stat">
+                <span class="h-stat-k">Mediana</span>
+                <span class="h-stat-v">${formatLapMs(medianMs)}</span>
+              </div>
+              <div class="h-stat">
+                <span class="h-stat-k">Najlepszy</span>
+                <span class="h-stat-v">${formatLapMs(bestMs)}</span>
+              </div>
+              <div class="h-stat">
+                <span class="h-stat-k">Najgorszy</span>
+                <span class="h-stat-v">${formatLapMs(worstMs)}</span>
+              </div>
+              <div class="h-stat">
+                <span class="h-stat-k">Rozrzut</span>
+                <span class="h-stat-v">${formatLapMs(Math.max(0, worstMs - bestMs))}</span>
+              </div>
+            `
+            : `
+              <div class="h-stat">
+                <span class="h-stat-k">Mediana</span>
+                <span class="h-stat-v">${formatLapMs(medianMs)}</span>
+              </div>
+              <div class="h-stat">
+                <span class="h-stat-k">Najlepszy</span>
+                <span class="h-stat-v">${formatLapMs(bestMs)}</span>
+              </div>
+              <div class="h-stat">
+                <span class="h-stat-k">Czas łączny</span>
+                <span class="h-stat-v">${formatHMS(item.totalMs)}</span>
+              </div>
+              <div class="h-stat">
+                <span class="h-stat-k">Próg</span>
+                <span class="h-stat-v">${formatShortMS(item.targetSeconds)}</span>
+              </div>
+            `;
+
+          const stageStats = computeStageStats(item.laps, false);
+          let stageBlockHtml = "";
+          if (stageStats) {
+            const idealLabel =
+              stageStats.idealCycleMs > 0
+                ? `Idealny cykl: ${formatLapMs(stageStats.idealCycleMs)}`
+                : `Cykle etapowe: ${stageStats.cycleCount}`;
+            stageBlockHtml = `
+              <div class="history-stage-block">
+                <div class="history-detail-bar">
+                  <span class="history-detail-subtitle">Analiza etapów</span>
+                  <span class="history-group-meta tabular">${idealLabel}</span>
+                </div>
+                <div class="stage-table-wrap">
+                  <table class="stage-stats-table tabular">
+                    <thead>
+                      <tr>
+                        <th>Etap</th>
+                        <th>Średnia</th>
+                        <th>Mediana</th>
+                        <th>Min – Max</th>
+                      </tr>
+                    </thead>
+                    <tbody>${buildStageStatsRowsHtml(stageStats)}</tbody>
+                  </table>
+                </div>
+              </div>
+            `;
+          }
+
+          let runningSum = 0;
+          let lapsHtml = "";
+          for (let i = 0; i < item.laps.length; i++) {
+            const lap = item.laps[i];
+            runningSum += lap.durationMs;
+            const diff = targetMs - lap.durationMs;
+            const diffClass = diff >= 0 ? "plus" : "minus";
+            const diffHtml = isFlowSession
+              ? ""
+              : `<span class="lap-diff ${diffClass}">${formatSignedMS(diff)}</span>`;
+            const hasStages =
+              Array.isArray(lap.stages) && lap.stages.length > 0;
+            let chipsHtml = "";
+            if (hasStages) {
+              const chipItems = lap.stages
+                .map((s, idx) => {
+                  const color = STAGE_COLORS[idx % STAGE_COLORS.length];
+                  return `<span class="lap-stage-chip"><span class="legend-dot" style="background:${color}"></span>${escapeHtml(s.name)}: <strong>${formatLapMs(s.durationMs)}</strong></span>`;
+                })
+                .join("");
+              chipsHtml = `<div class="lap-stages-detail">${chipItems}</div>`;
+            }
+            lapsHtml += `
+              <div class="history-lap-item">
+                <div class="history-lap-row tabular${isFlowSession ? " slow-flow" : ""}">
+                  <span class="lap-num">#${i + 1}</span>
+                  <span class="lap-time">${formatLapMs(lap.durationMs)}</span>
+                  <span class="lap-cum">${formatHMS(runningSum)}</span>
+                  ${diffHtml}
+                </div>
+                ${chipsHtml}
+              </div>
+            `;
+          }
+
+          return `
+            <div class="history-details">
+              <div class="history-item-stats tabular">${extraStatsHtml}</div>
+              ${stageBlockHtml}
+              <div class="history-detail-bar">
+                <span class="history-detail-subtitle">Pomiary w sesji (${item.laps.length})</span>
+                <button class="mini-btn" type="button" data-hist-csv="${safeId}">Eksport CSV</button>
+              </div>
+              <div class="history-laps-list">${lapsHtml}</div>
+            </div>
+          `;
+        }
+
+        function createHistoryCardElement(item) {
+          const safeId = escapeHtml(item.id);
+          const isFlowSession = item.mode === "slowflow";
+          const isStagesSession = item.mode === "stages";
+          const isExpanded = expandedHistoryIds.has(item.id);
+          const balanceMs = item.count * item.targetSeconds * 1000 - item.totalMs;
+          const balClass = balanceMs >= 0 ? "good" : "bad";
+          const fourthStatLabel = isFlowSession ? "Czas łączny" : "Bilans";
+          const fourthStatValue = isFlowSession
+            ? formatHMS(item.totalMs)
+            : formatSignedMS(balanceMs);
+          const fourthStatClass = isFlowSession ? "" : ` ${balClass}`;
+          const modeBadge = isFlowSession
+            ? '<span class="history-mode-badge">Slow Flow</span>'
+            : isStagesSession
+              ? '<span class="history-mode-badge stages">Etapy</span>'
+              : "";
+
+          const card = document.createElement("div");
+          card.className = "history-item";
+          card.innerHTML = `
             <div class="history-item-top">
               <div class="history-date-wrap">
                 <span class="history-date tabular">${escapeHtml(item.dateLabel)}</span>
                 ${modeBadge}
               </div>
               <div class="history-actions">
-                <button class="mini-btn" type="button" data-hist-copy="${escapeHtml(item.id)}">Kopiuj</button>
-                <button class="row-del-btn" type="button" data-hist-del="${escapeHtml(item.id)}" aria-label="Usuń sesję z historii" title="Usuń sesję">x</button>
+                <button class="mini-btn" type="button" data-hist-copy="${safeId}">Kopiuj</button>
+                <button class="history-expand-btn${isExpanded ? " open" : ""}" type="button" data-hist-toggle="${safeId}" aria-expanded="${isExpanded}" aria-label="Pokaż szczegóły sesji" title="Szczegóły sesji">v</button>
+                <button class="row-del-btn" type="button" data-hist-del="${safeId}" aria-label="Usuń sesję z historii" title="Usuń sesję">x</button>
               </div>
             </div>
-            <div class="history-item-stats tabular">
+            <div class="history-item-stats clickable tabular" data-hist-toggle="${safeId}">
               <div class="h-stat">
                 <span class="h-stat-k">Pozycje</span>
                 <span class="h-stat-v">${item.count}</span>
@@ -3527,12 +4144,112 @@
                 <span class="h-stat-v${fourthStatClass}">${fourthStatValue}</span>
               </div>
             </div>
+            ${isExpanded ? buildHistoryDetailsHtml(item) : ""}
           `;
-            frag.appendChild(card);
+          return card;
+        }
+
+        function isPeriodOpen(periodKey, periodIdx) {
+          if (userToggledHistoryPeriods.has(periodKey)) {
+            return userToggledHistoryPeriods.get(periodKey);
+          }
+          return periodIdx === 0;
+        }
+
+        function isDayGroupOpen(dayGroup) {
+          if (userToggledHistoryDays.has(dayGroup.key)) {
+            return userToggledHistoryDays.get(dayGroup.key);
+          }
+          return dayGroup.isToday;
+        }
+
+        /* Renderowanie historii sesji */
+        function renderHistory() {
+          const list = state.history;
+          els.historyCountBadge.textContent = String(list.length);
+          els.historyExportBtn.disabled = list.length === 0;
+
+          if (list.length === 0) {
+            els.historyContent.innerHTML =
+              '<div class="empty-msg">Brak zapisanych sesji w historii</div>';
+            return;
           }
 
-          els.historyBody.innerHTML = "";
-          els.historyBody.appendChild(frag);
+          const periods = groupHistorySessions(list);
+          const frag = document.createDocumentFragment();
+
+          for (let pIdx = 0; pIdx < periods.length; pIdx++) {
+            const period = periods[pIdx];
+            const periodOpen = isPeriodOpen(period.key, pIdx);
+            const periodEl = document.createElement("div");
+            periodEl.className = "history-period-group";
+
+            const periodHeader = document.createElement("button");
+            periodHeader.type = "button";
+            periodHeader.className = "history-period-header";
+            periodHeader.setAttribute("data-hist-period", period.key);
+            periodHeader.setAttribute("aria-expanded", String(periodOpen));
+            periodHeader.innerHTML = `
+              <span class="history-group-left">
+                <span class="history-period-title">${escapeHtml(period.title)}</span>
+                <span class="history-group-meta tabular">${formatSessionCount(period.totalCount)} · ${period.totalPositions} poz. · ${formatHMS(period.totalMs)}</span>
+              </span>
+              <span class="chevron${periodOpen ? " open" : ""}" aria-hidden="true">v</span>
+            `;
+            periodEl.appendChild(periodHeader);
+
+            if (periodOpen) {
+              const periodList = document.createElement("div");
+              periodList.className = "history-period-list";
+
+              for (let dIdx = 0; dIdx < period.days.length; dIdx++) {
+                const dayGroup = period.days[dIdx];
+                if (dayGroup.items.length === 1) {
+                  periodList.appendChild(
+                    createHistoryCardElement(dayGroup.items[0]),
+                  );
+                } else {
+                  const dayOpen = isDayGroupOpen(dayGroup);
+                  const dayWrap = document.createElement("div");
+                  dayWrap.className = "history-day-group";
+
+                  const dayHeader = document.createElement("button");
+                  dayHeader.type = "button";
+                  dayHeader.className = "history-day-header";
+                  dayHeader.setAttribute("data-hist-day", dayGroup.key);
+                  dayHeader.setAttribute("aria-expanded", String(dayOpen));
+                  dayHeader.innerHTML = `
+                    <span class="history-group-left">
+                      <span class="history-day-title tabular">${escapeHtml(dayGroup.label)}</span>
+                      <span class="history-group-meta tabular">${formatSessionCount(dayGroup.items.length)} · ${dayGroup.totalPositions} poz. · ${formatHMS(dayGroup.totalMs)}</span>
+                    </span>
+                    <span class="chevron${dayOpen ? " open" : ""}" aria-hidden="true">v</span>
+                  `;
+                  dayWrap.appendChild(dayHeader);
+
+                  if (dayOpen) {
+                    const dayList = document.createElement("div");
+                    dayList.className = "history-day-list";
+                    for (let i = 0; i < dayGroup.items.length; i++) {
+                      dayList.appendChild(
+                        createHistoryCardElement(dayGroup.items[i]),
+                      );
+                    }
+                    dayWrap.appendChild(dayList);
+                  }
+
+                  periodList.appendChild(dayWrap);
+                }
+              }
+
+              periodEl.appendChild(periodList);
+            }
+
+            frag.appendChild(periodEl);
+          }
+
+          els.historyContent.innerHTML = "";
+          els.historyContent.appendChild(frag);
         }
 
         function escapeHtml(str) {
@@ -3798,10 +4515,12 @@
           if (stats.count === 0) return;
 
           const now = new Date();
+          const nowMs = now.getTime();
           const dateLabel = `${pad2(now.getDate())}.${pad2(now.getMonth() + 1)}.${now.getFullYear()} ${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
 
           const record = {
-            id: `hist_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+            id: `hist_${nowMs}_${Math.random().toString(36).slice(2, 6)}`,
+            createdAt: nowMs,
             dateLabel,
             mode: state.mode,
             count: stats.count,
@@ -3906,37 +4625,58 @@
           execCommandCopyFallback(text, successMsg);
         }
 
-        function exportCsv() {
-          if (state.laps.length === 0) return;
-          const targetMs = state.targetSeconds * 1000;
-          const isFlow = state.mode === "slowflow";
+        function downloadBlobFile(content, mimeType, fileName) {
+          const blob = new Blob([content], { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function exportLapsCsv(laps, options) {
+          if (!Array.isArray(laps) || laps.length === 0) return;
+          const isFlow = Boolean(options.isFlow);
+          const targetMs = options.targetSeconds * 1000;
+          const fallbackStageNames = Array.isArray(options.stageNames)
+            ? options.stageNames
+            : [];
 
           let maxStages = 0;
           const stageHeaders = [];
-          for (let i = 0; i < state.laps.length; i++) {
-            const st = state.laps[i].stages;
+          for (let i = 0; i < laps.length; i++) {
+            const st = laps[i].stages;
             if (Array.isArray(st) && st.length > maxStages) {
               maxStages = st.length;
             }
           }
           for (let s = 0; s < maxStages; s++) {
-            let label = state.stageNames[s] || `Etap ${s + 1}`;
-            for (let i = state.laps.length - 1; i >= 0; i--) {
-              if (state.laps[i].stages && state.laps[i].stages[s]) {
-                label = state.laps[i].stages[s].name;
+            let label = fallbackStageNames[s] || `Etap ${s + 1}`;
+            for (let i = laps.length - 1; i >= 0; i--) {
+              if (laps[i].stages && laps[i].stages[s]) {
+                label = laps[i].stages[s].name;
                 break;
               }
             }
             stageHeaders.push(`"${label.replace(/"/g, '""')}"`);
           }
 
-          const headCols = ["Nr", ...stageHeaders, "Czas pozycji", "Czas laczny", "Sekundy"];
+          const headCols = [
+            "Nr",
+            ...stageHeaders,
+            "Czas pozycji",
+            "Czas laczny",
+            "Sekundy",
+          ];
           if (!isFlow) headCols.push("Bilans wzgledem progu");
           const rows = [headCols.join(";")];
           let sum = 0;
 
-          for (let i = 0; i < state.laps.length; i++) {
-            const lap = state.laps[i];
+          for (let i = 0; i < laps.length; i++) {
+            const lap = laps[i];
             const d = lap.durationMs;
             sum += d;
             const centiSec = (Math.floor(d / 10) / 100)
@@ -3962,21 +4702,172 @@
           }
 
           const csvContent = "\uFEFF" + rows.join("\r\n");
-          const blob = new Blob([csvContent], {
-            type: "text/csv;charset=utf-8;",
-          });
-          const url = URL.createObjectURL(blob);
-          const now = new Date();
-          const fileName = `tempo_${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}_${pad2(now.getHours())}${pad2(now.getMinutes())}.csv`;
+          downloadBlobFile(
+            csvContent,
+            "text/csv;charset=utf-8;",
+            options.fileName,
+          );
+          showToast(options.toastMsg || "Wyeksportowano plik CSV");
+        }
 
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
-          showToast("Wyeksportowano plik CSV");
+        function exportCsv() {
+          if (state.laps.length === 0) return;
+          const now = new Date();
+          exportLapsCsv(state.laps, {
+            isFlow: state.mode === "slowflow",
+            targetSeconds: state.targetSeconds,
+            stageNames: state.stageNames,
+            fileName: `tempo_${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}_${pad2(now.getHours())}${pad2(now.getMinutes())}.csv`,
+            toastMsg: "Wyeksportowano plik CSV",
+          });
+        }
+
+        function exportHistoryCsv(item) {
+          if (!item || !Array.isArray(item.laps) || item.laps.length === 0) {
+            return;
+          }
+          const d = parseHistoryDate(item);
+          const fileName = d
+            ? `tempo_${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}_${pad2(d.getHours())}${pad2(d.getMinutes())}.csv`
+            : "tempo_sesja.csv";
+          exportLapsCsv(item.laps, {
+            isFlow: item.mode === "slowflow",
+            targetSeconds: item.targetSeconds,
+            stageNames: [],
+            fileName,
+            toastMsg: "Wyeksportowano sesję do CSV",
+          });
+        }
+
+        function exportHistoryJson() {
+          if (state.history.length === 0) return;
+          const now = new Date();
+          const payload = {
+            app: "TEMPO",
+            schemaVersion: 1,
+            exportedAt: now.toISOString(),
+            history: state.history,
+          };
+          const fileName = `tempo_historia_${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}_${pad2(now.getHours())}${pad2(now.getMinutes())}.json`;
+          downloadBlobFile(
+            JSON.stringify(payload, null, 2),
+            "application/json;charset=utf-8;",
+            fileName,
+          );
+          showToast(
+            `Wyeksportowano historię (${formatSessionCount(state.history.length)})`,
+          );
+        }
+
+        async function handleHistoryImportFile(file) {
+          if (!file) return;
+          if (file.size > 10 * 1024 * 1024) {
+            showToast("Wybrany plik jest za duży (maks. 10 MB)");
+            return;
+          }
+          try {
+            const rawText = await file.text();
+            const parsed = JSON.parse(rawText);
+            const rawList = Array.isArray(parsed)
+              ? parsed
+              : parsed && Array.isArray(parsed.history)
+                ? parsed.history
+                : null;
+            if (!rawList) {
+              showToast("Nieprawidłowy format pliku kopii zapasowej");
+              return;
+            }
+
+            const seenImportedIds = new Set();
+            const imported = [];
+            for (let i = 0; i < rawList.length; i++) {
+              const clean = sanitizeHistoryItem(rawList[i]);
+              if (clean && !seenImportedIds.has(clean.id)) {
+                seenImportedIds.add(clean.id);
+                imported.push(clean);
+              }
+            }
+
+            if (imported.length === 0) {
+              showToast("Plik nie zawiera poprawnych zapisanych sesji");
+              return;
+            }
+
+            if (state.history.length === 0) {
+              state.history = sortHistoryNewestFirst(imported);
+              expandedHistoryIds.clear();
+              userToggledHistoryPeriods.clear();
+              userToggledHistoryDays.clear();
+              saveState();
+              renderHistory();
+              showToast(
+                `Zaimportowano ${formatSessionCount(imported.length, true)}`,
+              );
+              return;
+            }
+
+            const existingIds = new Set(state.history.map((h) => h.id));
+            const newItems = imported.filter((h) => !existingIds.has(h.id));
+            const newCountText =
+              newItems.length > 0
+                ? `w tym ${formatSessionCount(newItems.length)} nowych`
+                : "wszystkie pokrywają się z obecną historią";
+
+            openModal(
+              "Import historii sesji",
+              `Znaleziono ${formatSessionCount(imported.length, true)} w pliku (${newCountText}).`,
+              [
+                {
+                  label:
+                    newItems.length > 0
+                      ? `Scal z obecną historią (+${newItems.length})`
+                      : "Scal z obecną historią (brak nowych)",
+                  className: "primary",
+                  onClick: () => {
+                    if (newItems.length > 0) {
+                      state.history = sortHistoryNewestFirst([
+                        ...state.history,
+                        ...newItems,
+                      ]);
+                      userToggledHistoryPeriods.clear();
+                      saveState();
+                      renderHistory();
+                    }
+                    closeModal();
+                    showToast(
+                      newItems.length > 0
+                        ? `Dodano ${formatSessionCount(newItems.length, true)}`
+                        : "Wszystkie sesje są już w historii",
+                    );
+                  },
+                },
+                {
+                  label: `Zastąp obecną historię (${imported.length})`,
+                  className: "danger",
+                  onClick: () => {
+                    state.history = sortHistoryNewestFirst(imported);
+                    expandedHistoryIds.clear();
+                    userToggledHistoryPeriods.clear();
+                    userToggledHistoryDays.clear();
+                    saveState();
+                    renderHistory();
+                    closeModal();
+                    showToast(
+                      `Zastąpiono historię (${formatSessionCount(imported.length)})`,
+                    );
+                  },
+                },
+                {
+                  label: "Anuluj",
+                  className: "",
+                  onClick: closeModal,
+                },
+              ],
+              "Scalenie dopisze tylko brakujące sesje. Zastąpienie usunie obecne sesje z tej przeglądarki.",
+            );
+          } catch (err) {
+            showToast("Nie udało się odczytać pliku JSON");
+          }
         }
 
         /* Niestandardowy modal i toast */
@@ -4067,7 +4958,12 @@
           const idx = parseInt(input.getAttribute("data-stage-name"), 10);
           if (isNaN(idx) || idx < 0 || idx >= state.stageNames.length) return;
           input.value = state.stageNames[idx];
-          renderAllStatic();
+          const stageStats = computeStageStats();
+          renderStageBanner();
+          renderSvgChart(stageStats);
+          renderStageStats(stageStats);
+          updateLiveDisplay(Date.now());
+          syncGoalInputs("all");
         }, true);
 
         els.stageEditorList.addEventListener("click", (e) => {
@@ -4222,6 +5118,19 @@
           els.historyToggleBtn.setAttribute("aria-expanded", String(isOpen));
         });
 
+        // Eksport i import historii sesji (JSON)
+        els.historyExportBtn.addEventListener("click", exportHistoryJson);
+        els.historyImportBtn.addEventListener("click", () => {
+          els.historyImportInput.click();
+        });
+        els.historyImportInput.addEventListener("change", (e) => {
+          const file = e.target.files && e.target.files[0];
+          e.target.value = "";
+          if (file) {
+            handleHistoryImportFile(file);
+          }
+        });
+
         // Delegacja akcji na elementach historii
         els.historyBody.addEventListener("click", (e) => {
           const copyBtn = e.target.closest("[data-hist-copy]");
@@ -4233,6 +5142,16 @@
                 buildPlainTextReport(item.laps),
                 "Skopiowano pomiary z historii",
               );
+            }
+            return;
+          }
+
+          const csvBtn = e.target.closest("[data-hist-csv]");
+          if (csvBtn) {
+            const id = csvBtn.getAttribute("data-hist-csv");
+            const item = state.history.find((h) => h.id === id);
+            if (item) {
+              exportHistoryCsv(item);
             }
             return;
           }
@@ -4251,6 +5170,7 @@
                   className: "danger",
                   onClick: () => {
                     state.history = state.history.filter((h) => h.id !== id);
+                    expandedHistoryIds.delete(id);
                     saveState();
                     renderHistory();
                     closeModal();
@@ -4264,6 +5184,37 @@
                 },
               ],
             );
+            return;
+          }
+
+          const toggleCardBtn = e.target.closest("[data-hist-toggle]");
+          if (toggleCardBtn) {
+            const id = toggleCardBtn.getAttribute("data-hist-toggle");
+            if (expandedHistoryIds.has(id)) {
+              expandedHistoryIds.delete(id);
+            } else {
+              expandedHistoryIds.add(id);
+            }
+            renderHistory();
+            return;
+          }
+
+          const dayHeaderBtn = e.target.closest("[data-hist-day]");
+          if (dayHeaderBtn) {
+            const dayKey = dayHeaderBtn.getAttribute("data-hist-day");
+            const isOpen = dayHeaderBtn.getAttribute("aria-expanded") === "true";
+            userToggledHistoryDays.set(dayKey, !isOpen);
+            renderHistory();
+            return;
+          }
+
+          const periodHeaderBtn = e.target.closest("[data-hist-period]");
+          if (periodHeaderBtn) {
+            const periodKey = periodHeaderBtn.getAttribute("data-hist-period");
+            const isOpen =
+              periodHeaderBtn.getAttribute("aria-expanded") === "true";
+            userToggledHistoryPeriods.set(periodKey, !isOpen);
+            renderHistory();
           }
         });
 

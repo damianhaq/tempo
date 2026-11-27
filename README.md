@@ -3,7 +3,7 @@
 Lekka aplikacja webowa (PWA) w czystym HTML, CSS i JavaScript do mierzenia tempa pracy powtarzalnej z ustawianym progiem docelowym i podglądem bilansu czasu na żywo. Zaprojektowana z myślą o obsłudze jedną ręką na telefonie, działaniu w trybie offline oraz odporności na blokowanie ekranu.
 
 **Podgląd (GitHub Pages):** `https://damianhaq.github.io/tempo/`  
-**Aktualna wersja:** `1.3`
+**Aktualna wersja:** `1.4`
 
 ## Funkcje
 
@@ -16,7 +16,7 @@ Lekka aplikacja webowa (PWA) w czystym HTML, CSS i JavaScript do mierzenia tempa
 - **Szybka korekta pomiarów:** usuwanie pojedynczych błędnych wpisów z listy oraz cofanie ostatniej pozycji z przywróceniem jej czasu do bieżącego okrążenia.
 - **Statystyki i wykres:** średnia, mediana, tempo na godzinę, najkrótszy i najdłuższy czas oraz podgląd przebiegu sesji na wykresie SVG.
 - **Odporność na minimalizację i blokadę ekranu:** czas wyliczany jest na podstawie znaczników zegara systemowego (`Date.now()`), dzięki czemu odliczanie nie gubi sekund w tle ani po wygaszeniu ekranu.
-- **Zapis w przeglądarce i eksport:** pełna trwałość aktywnej sesji, ustawień oraz historii w `localStorage`, kopiowanie listy w formacie tekstowym oraz eksport do pliku CSV.
+- **Zapis w przeglądarce i eksport:** pełna trwałość aktywnej sesji, ustawień oraz historii w `localStorage`, grupowanie i rozwijane szczegóły sesji w historii, kopiowanie listy w formacie tekstowym, eksport sesji (bieżącej i archiwalnej) do CSV oraz kopia zapasowa historii (eksport/import JSON).
 - **Tryb offline (PWA):** instalacja na ekranie głównym telefonu i uruchamianie bez dostępu do sieci dzięki Service Workerowi.
 
 ## Struktura projektu
@@ -35,6 +35,11 @@ Lekka aplikacja webowa (PWA) w czystym HTML, CSS i JavaScript do mierzenia tempa
 ```
 
 ## Historia zmian
+
+### v1.4 (27.11.2026)
+- **Rozwijane karty w historii sesji:** po kliknięciu karty lub przycisku szczegółów wyświetlane są dodatkowe statystyki (`Mediana`, `Najlepszy`, `Czas łączny`/`Najgorszy`, `Próg`/`Rozrzut`), pełna tabela analizy etapów dla sesji etapowych, lista wszystkich zapisanych pomiarów z tamtej sesji (wraz z chipami etapów) oraz przycisk **Eksport CSV** dla danej sesji archiwalnej.
+- **Inteligentne grupowanie historii:** automatyczny podział sesji na okresy (`Ten tydzień`, `Poprzedni tydzień`, kolejne miesiące) z podsumowaniem łącznej liczby sesji, pozycji i czasu pracy, oraz grupowanie sesji z tego samego dnia wyłącznie wtedy, gdy w danym dniu zapisano co najmniej 2 sesje (pojedyncza sesja w dniu wyświetla się bezpośrednio bez dodatkowej ramki).
+- **Kopia zapasowa historii (Eksport / Import JSON):** możliwość pobrania całej historii do pliku `.json` oraz wczytania kopii z pliku z wyborem scalenia nowych sesji bez duplikatów lub zastąpienia obecnej historii.
 
 ### v1.3 (27.11.2026)
 - **Widok trybu `Etapy` (Wariant A):** neutralny ciemny przycisk z górnym paskiem koloru etapu (bez kolidującej kolorowej ramki), wyraźna nazwa aktualnego etapu, usunięcie zbędnej dolnej linijki akcji podczas pracy oraz baner aktualnego etapu ze stabilną ścieżką kroków (bez zawijania linii po ukończeniu etapu).
