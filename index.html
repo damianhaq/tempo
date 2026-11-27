@@ -284,6 +284,16 @@
         font-size: 0.74rem;
       }
 
+      .stage-lock-hint {
+        font-size: 0.75rem;
+        color: var(--text-dim);
+        line-height: 1.4;
+      }
+
+      .stage-lock-hint[hidden] {
+        display: none;
+      }
+
       /* Panel ustawień progu docelowego */
       .card {
         background: var(--card);
@@ -543,7 +553,66 @@
         color: var(--red);
       }
 
-      /* Wskaźnik bieżącego okrążenia z paskiem postępu */
+      /* Baner aktualnego etapu i pasek postępu cyklu */
+      .stage-banner {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--teal);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+      }
+
+      .stage-banner[hidden] {
+        display: none;
+      }
+
+      .stage-banner-kicker {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+      }
+
+      .stage-banner-name {
+        font-size: clamp(1.2rem, 4.8vw, 1.42rem);
+        font-weight: 800;
+        line-height: 1.15;
+        color: var(--text);
+        overflow-wrap: anywhere;
+      }
+
+      .stage-trail {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 6px;
+        font-size: 0.75rem;
+        color: var(--text-dim);
+      }
+
+      .stage-trail-sep {
+        opacity: 0.55;
+      }
+
+      .stage-trail-item {
+        white-space: nowrap;
+      }
+
+      .stage-trail-item.done {
+        color: var(--text-dim);
+        text-decoration: line-through;
+        opacity: 0.75;
+      }
+
+      .stage-trail-item.active {
+        color: var(--text);
+        font-weight: 700;
+      }
+
       .current-lap-bar-wrap {
         display: flex;
         flex-direction: column;
@@ -655,6 +724,26 @@
         background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
       }
 
+      .main-btn.stages-active {
+        border-color: var(--border-strong);
+        background: linear-gradient(180deg, #1f2532 0%, #151922 100%);
+      }
+
+      .main-btn.stages-active.running {
+        border-color: var(--border-strong);
+        background: linear-gradient(180deg, #212836 0%, #141821 100%);
+      }
+
+      .main-btn.stages-active.running.over-target {
+        border-color: var(--red);
+        background: linear-gradient(180deg, #b91c1c 0%, #991b1b 100%);
+      }
+
+      .main-btn.stages-active.paused {
+        border-color: #b45309;
+        background: linear-gradient(180deg, #45270b 0%, #2a1807 100%);
+      }
+
       .main-btn.locked {
         opacity: 0.72;
         cursor: wait;
@@ -665,7 +754,45 @@
         font-weight: 700;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        opacity: 0.9;
+        opacity: 0.82;
+        text-align: center;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+      }
+
+      .main-btn-stage-bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 4px;
+        background: transparent;
+      }
+
+      .main-btn-stage {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: clamp(1.22rem, 5vw, 1.48rem);
+        font-weight: 800;
+        letter-spacing: 0.01em;
+        line-height: 1.15;
+        color: #ffffff;
+        max-width: 100%;
+        text-align: center;
+        overflow-wrap: anywhere;
+      }
+
+      .main-btn-stage[hidden] {
+        display: none;
+      }
+
+      .main-btn-stage-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
       }
 
       .main-btn-timer {
@@ -681,6 +808,9 @@
         font-weight: 700;
         color: rgba(255, 255, 255, 0.84);
         letter-spacing: 0.02em;
+        text-align: center;
+        max-width: 100%;
+        overflow-wrap: anywhere;
       }
 
       .main-btn-sub[hidden] {
@@ -694,6 +824,13 @@
         text-transform: uppercase;
         opacity: 0.95;
         margin-top: 2px;
+        text-align: center;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+      }
+
+      .main-btn-action[hidden] {
+        display: none;
       }
 
       .cooldown-bar {
@@ -759,6 +896,14 @@
         .stats-grid {
           grid-template-columns: repeat(3, 1fr);
         }
+
+        .stats-grid.slow-flow {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .stats-grid.slow-flow .stat-card-speed {
+        display: none;
       }
 
       .stat-card {
@@ -1632,6 +1777,9 @@
             </button>
           </div>
           <div id="stageEditorList" class="stage-editor-list"></div>
+          <p id="stageLockHint" class="stage-lock-hint" hidden>
+            Kolejność i usuwanie etapów są zablokowane w trakcie aktywnego cyklu.
+          </p>
         </div>
         <div class="setting-row">
           <span class="setting-desc"
@@ -1656,6 +1804,14 @@
           <div id="balanceValue" class="balance-value tabular">00:00</div>
         </div>
 
+        <div id="stageBanner" class="stage-banner tabular" hidden>
+          <span id="stageBannerKicker" class="stage-banner-kicker"
+            >Aktualny etap · 1 z 3</span
+          >
+          <div id="stageBannerName" class="stage-banner-name">Etap 1</div>
+          <div id="stageBannerTrail" class="stage-trail"></div>
+        </div>
+
         <div class="current-lap-bar-wrap">
           <div class="current-lap-meta">
             <span id="currentLapLabel">Bieżąca pozycja</span>
@@ -1671,9 +1827,14 @@
 
       <!-- 3. Ogromny przycisk główny i sterowanie -->
       <button id="mainBtn" class="main-btn" type="button">
+        <span id="mainBtnStageBar" class="main-btn-stage-bar"></span>
         <span id="mainBtnTop" class="main-btn-top tabular"
           >Gotowy do startu</span
         >
+        <span id="mainBtnStage" class="main-btn-stage" hidden>
+          <span id="mainBtnStageDot" class="main-btn-stage-dot"></span>
+          <span id="mainBtnStageName">Etap 1</span>
+        </span>
         <span id="mainBtnTimer" class="main-btn-timer tabular">00:00.00</span>
         <span id="mainBtnSub" class="main-btn-sub tabular" hidden
           >Cykl: 00:00.00</span
@@ -1700,7 +1861,11 @@
       </div>
 
       <!-- 4. Siatka statystyk na żywo -->
-      <section class="stats-grid" aria-label="Statystyki bieżącej sesji">
+      <section
+        id="statsGrid"
+        class="stats-grid"
+        aria-label="Statystyki bieżącej sesji"
+      >
         <div class="stat-card">
           <span class="stat-label">Pozycje</span>
           <span id="statCount" class="stat-value tabular">0</span>
@@ -1709,19 +1874,19 @@
           <span class="stat-label">Czas łączny</span>
           <span id="statTotal" class="stat-value tabular">00:00:00</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-card-speed">
           <span class="stat-label">Średnia</span>
           <span id="statAvg" class="stat-value tabular">--:--.--</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-card-speed">
           <span class="stat-label">Mediana</span>
           <span id="statMedian" class="stat-value tabular">--:--.--</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-card-speed">
           <span class="stat-label">Tempo</span>
           <span id="statRate" class="stat-value tabular">0,00 / h</span>
         </div>
-        <div class="stat-card">
+        <div class="stat-card stat-card-speed">
           <span class="stat-label">Najlepszy czas</span>
           <span id="statBest" class="stat-value tabular">--:--.--</span>
         </div>
@@ -1923,6 +2088,7 @@
           goalGrid: document.getElementById("goalGrid"),
           stageConfigWrap: document.getElementById("stageConfigWrap"),
           stageEditorList: document.getElementById("stageEditorList"),
+          stageLockHint: document.getElementById("stageLockHint"),
           addStageBtn: document.getElementById("addStageBtn"),
           goalCloseBtn: document.getElementById("goalCloseBtn"),
           targetMin: document.getElementById("targetMin"),
@@ -1934,12 +2100,20 @@
           balanceTag: document.getElementById("balanceTag"),
           balanceSub: document.getElementById("balanceSub"),
           balanceValue: document.getElementById("balanceValue"),
+          stageBanner: document.getElementById("stageBanner"),
+          stageBannerKicker: document.getElementById("stageBannerKicker"),
+          stageBannerName: document.getElementById("stageBannerName"),
+          stageBannerTrail: document.getElementById("stageBannerTrail"),
           currentLapLabel: document.getElementById("currentLapLabel"),
           currentLapDelta: document.getElementById("currentLapDelta"),
           currentLapProgress: document.getElementById("currentLapProgress"),
 
           mainBtn: document.getElementById("mainBtn"),
+          mainBtnStageBar: document.getElementById("mainBtnStageBar"),
           mainBtnTop: document.getElementById("mainBtnTop"),
+          mainBtnStage: document.getElementById("mainBtnStage"),
+          mainBtnStageDot: document.getElementById("mainBtnStageDot"),
+          mainBtnStageName: document.getElementById("mainBtnStageName"),
           mainBtnTimer: document.getElementById("mainBtnTimer"),
           mainBtnSub: document.getElementById("mainBtnSub"),
           mainBtnAction: document.getElementById("mainBtnAction"),
@@ -1949,6 +2123,7 @@
           undoBtn: document.getElementById("undoBtn"),
           finishBtn: document.getElementById("finishBtn"),
 
+          statsGrid: document.getElementById("statsGrid"),
           statCount: document.getElementById("statCount"),
           statTotal: document.getElementById("statTotal"),
           statAvg: document.getElementById("statAvg"),
@@ -2134,10 +2309,10 @@
               Number.isInteger(parsed.currentStageIndex)
                 ? parsed.currentStageIndex
                 : currentCycleStages.length;
-            const currentStageIndex =
-              mode === "stages"
-                ? Math.max(0, Math.min(stageNames.length - 1, rawStageIdx))
-                : 0;
+            const isActiveStages = mode === "stages" && status !== "idle";
+            const currentStageIndex = isActiveStages
+              ? Math.max(0, Math.min(stageNames.length - 1, rawStageIdx))
+              : 0;
 
             return {
               status,
@@ -2164,7 +2339,7 @@
               mode,
               stageNames,
               currentStageIndex,
-              currentCycleStages: mode === "stages" ? currentCycleStages : [],
+              currentCycleStages: isActiveStages ? currentCycleStages : [],
               history: Array.isArray(parsed.history)
                 ? parsed.history.map(sanitizeHistoryItem).filter(Boolean)
                 : [],
@@ -2514,7 +2689,9 @@
 
         function renderStageEditor() {
           const frag = document.createDocumentFragment();
-          const canDelete = state.stageNames.length > 2;
+          const isCycleActive =
+            state.status !== "idle" || state.currentCycleStages.length > 0;
+          const canDelete = !isCycleActive && state.stageNames.length > 2;
           for (let i = 0; i < state.stageNames.length; i++) {
             const row = document.createElement("div");
             row.className = "stage-editor-row";
@@ -2522,21 +2699,25 @@
             row.innerHTML = `
               <span class="stage-idx-dot" style="background:${color}"></span>
               <input class="input-box stage-name-input" type="text" maxlength="28" value="${escapeHtml(state.stageNames[i])}" data-stage-name="${i}" aria-label="Nazwa etapu ${i + 1}" />
-              <button class="mini-btn stage-move-btn" type="button" data-stage-up="${i}" aria-label="Przesuń etap ${i + 1} w górę" ${i === 0 ? "disabled" : ""}>↑</button>
-              <button class="mini-btn stage-move-btn" type="button" data-stage-down="${i}" aria-label="Przesuń etap ${i + 1} w dół" ${i === state.stageNames.length - 1 ? "disabled" : ""}>↓</button>
+              <button class="mini-btn stage-move-btn" type="button" data-stage-up="${i}" aria-label="Przesuń etap ${i + 1} w górę" ${isCycleActive || i === 0 ? "disabled" : ""}>↑</button>
+              <button class="mini-btn stage-move-btn" type="button" data-stage-down="${i}" aria-label="Przesuń etap ${i + 1} w dół" ${isCycleActive || i === state.stageNames.length - 1 ? "disabled" : ""}>↓</button>
               <button class="row-del-btn" type="button" data-stage-del="${i}" aria-label="Usuń etap ${i + 1}" ${!canDelete ? "disabled" : ""}>x</button>
             `;
             frag.appendChild(row);
           }
           els.stageEditorList.innerHTML = "";
           els.stageEditorList.appendChild(frag);
+          els.stageLockHint.hidden = !isCycleActive;
           els.addStageBtn.disabled = state.stageNames.length >= 8;
         }
 
         function applyTimeGoal(commit) {
           const rawMin = els.targetMin.value.trim();
           const rawSec = els.targetSec.value.trim();
-          if (!commit && rawMin === "" && rawSec === "") return;
+          if (rawMin === "" && rawSec === "") {
+            if (commit) syncGoalInputs("all");
+            return;
+          }
 
           let m = parseInt(rawMin, 10);
           let s = parseInt(rawSec, 10);
@@ -2585,6 +2766,48 @@
           return "etapów";
         }
 
+        function renderStageBanner() {
+          if (state.mode !== "stages") {
+            els.stageBanner.hidden = true;
+            return;
+          }
+          els.stageBanner.hidden = false;
+          const stageCount = state.stageNames.length;
+          const safeStageIdx = Math.max(
+            0,
+            Math.min(stageCount - 1, state.currentStageIndex),
+          );
+          const stageColor = STAGE_COLORS[safeStageIdx % STAGE_COLORS.length];
+          const isIdle = state.status === "idle";
+          const currentName = isIdle
+            ? state.stageNames[0]
+            : state.stageNames[safeStageIdx];
+
+          els.stageBanner.style.borderLeftColor = stageColor;
+          els.stageBannerKicker.textContent = isIdle
+            ? `Gotowy · Etap 1 z ${stageCount}`
+            : state.status === "paused"
+              ? `Wstrzymano · Etap ${safeStageIdx + 1} z ${stageCount}`
+              : `Aktualny etap · ${safeStageIdx + 1} z ${stageCount}`;
+          els.stageBannerName.textContent = currentName;
+
+          const parts = [];
+          for (let i = 0; i < stageCount; i++) {
+            const label = `${i + 1}. ${escapeHtml(state.stageNames[i])}`;
+            const finished = state.currentCycleStages[i];
+            if (finished) {
+              parts.push(`<span class="stage-trail-item done">${label}</span>`);
+            } else if ((!isIdle && i === safeStageIdx) || (isIdle && i === 0)) {
+              parts.push(`<span class="stage-trail-item active">${label}</span>`);
+            } else {
+              parts.push(`<span class="stage-trail-item">${label}</span>`);
+            }
+          }
+          els.stageBannerTrail.innerHTML = parts.join(
+            '<span class="stage-trail-sep">→</span>',
+          );
+        }
+
         /* Aktualizacja płynnych liczników (wywoływana w pętli rAF) */
         function updateLiveDisplay(nowTs) {
           const currentStageMs = getCurrentLapMs(nowTs);
@@ -2615,9 +2838,14 @@
             "paused",
             "over-target",
             "slow-flow-active",
+            "stages-active",
           );
           els.mainBtn.classList.toggle("slow-flow-active", isFlow);
-          els.mainBtnSub.hidden = !isStages;
+          els.mainBtn.classList.toggle("stages-active", isStages);
+          els.mainBtnStageBar.style.background = "transparent";
+          els.mainBtnStage.hidden = !isStages;
+          els.mainBtnSub.hidden = !isStages || state.status === "idle";
+          els.mainBtnAction.hidden = isStages && state.status === "running";
 
           const formatMainTimer = isFlow ? formatLapWholeSec : formatLapMs;
           const stageCount = state.stageNames.length;
@@ -2626,13 +2854,20 @@
             Math.min(stageCount - 1, state.currentStageIndex),
           );
           const currentStageName = state.stageNames[safeStageIdx];
+          const currentStageColor =
+            STAGE_COLORS[safeStageIdx % STAGE_COLORS.length];
+
+          if (isStages) {
+            els.mainBtnStageDot.style.background = currentStageColor;
+            els.mainBtnStageName.textContent =
+              state.status === "idle" ? state.stageNames[0] : currentStageName;
+          }
 
           if (state.status === "idle") {
             if (isFlow) {
               els.mainBtnTop.textContent = "Tryb Slow Flow — gotowy";
             } else if (isStages) {
-              els.mainBtnTop.textContent = `Tryb etapowy — ${stageCount} ${pluralEtap(stageCount)}`;
-              els.mainBtnSub.textContent = `Etap 1: ${state.stageNames[0]}`;
+              els.mainBtnTop.textContent = `Tryb etapowy · Etap 1 z ${stageCount}`;
             } else {
               els.mainBtnTop.textContent = "Gotowy do startu";
             }
@@ -2640,17 +2875,15 @@
             els.mainBtnAction.textContent = "START";
           } else if (state.status === "running") {
             els.mainBtn.classList.add("running");
-            if (!isFlow && activeCycleMs > targetMs) {
+            const isOverTarget = !isFlow && activeCycleMs > targetMs;
+            if (isOverTarget) {
               els.mainBtn.classList.add("over-target");
             }
             if (isStages) {
-              els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1} · Etap ${safeStageIdx + 1}/${stageCount}: ${currentStageName}`;
+              els.mainBtnStageBar.style.background = currentStageColor;
+              els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1} · Etap ${safeStageIdx + 1} z ${stageCount}`;
               els.mainBtnTimer.textContent = formatLapMs(currentStageMs);
               els.mainBtnSub.textContent = `Cykl: ${formatLapMs(activeCycleMs)}`;
-              els.mainBtnAction.textContent =
-                safeStageIdx < stageCount - 1
-                  ? `NASTĘPNY: ${state.stageNames[safeStageIdx + 1]}`
-                  : "ZAKOŃCZ CYKL";
             } else {
               els.mainBtnTop.textContent = `Pozycja #${state.laps.length + 1}`;
               els.mainBtnTimer.textContent = formatMainTimer(currentStageMs);
@@ -2659,7 +2892,8 @@
           } else if (state.status === "paused") {
             els.mainBtn.classList.add("paused");
             if (isStages) {
-              els.mainBtnTop.textContent = `Wstrzymano · Etap ${safeStageIdx + 1}/${stageCount}: ${currentStageName}`;
+              els.mainBtnStageBar.style.background = currentStageColor;
+              els.mainBtnTop.textContent = `Wstrzymano · Pozycja #${state.laps.length + 1} · Etap ${safeStageIdx + 1} z ${stageCount}`;
               els.mainBtnTimer.textContent = formatLapMs(currentStageMs);
               els.mainBtnSub.textContent = `Cykl: ${formatLapMs(activeCycleMs)}`;
               els.mainBtnAction.textContent = "WZNÓW ETAP";
@@ -2771,6 +3005,20 @@
             "status-dot" +
             (state.status !== "idle" ? ` ${state.status}` : "") +
             (isFlow ? " slow-flow" : isStages ? " stages" : "");
+          if (isStages && state.status === "running") {
+            const dotColor =
+              STAGE_COLORS[
+                Math.max(0, Math.min(state.stageNames.length - 1, state.currentStageIndex)) %
+                  STAGE_COLORS.length
+              ];
+            els.statusDot.style.background = dotColor;
+            els.statusDot.style.boxShadow = `0 0 10px ${dotColor}99`;
+          } else {
+            els.statusDot.style.background = "";
+            els.statusDot.style.boxShadow = "";
+          }
+
+          renderStageBanner();
 
           // Bilans sesji / widok Slow Flow
           els.balanceCard.classList.remove("ahead", "behind", "slow-flow");
@@ -2814,6 +3062,7 @@
           els.exportCsvBtn.disabled = stats.count === 0;
 
           // Karty statystyk
+          els.statsGrid.classList.toggle("slow-flow", isFlow);
           els.statCount.textContent = String(stats.count);
           els.statAvg.className = "stat-value tabular";
           if (stats.count > 0) {
@@ -2898,7 +3147,7 @@
         }
 
         function renderStageStats(stageStats) {
-          if (!stageStats) {
+          if (state.mode === "slowflow" || !stageStats) {
             els.stageStatsCard.hidden = true;
             return;
           }
@@ -2965,7 +3214,9 @@
             return;
           }
 
-          if (!stageStats || stageStats.rows.length === 0) {
+          const isFlow = state.mode === "slowflow";
+
+          if (isFlow || !stageStats || stageStats.rows.length === 0) {
             selectedStageFilter = null;
             els.chartLegend.hidden = true;
           } else {
@@ -2986,7 +3237,6 @@
               .join("");
           }
 
-          const isFlow = state.mode === "slowflow";
           const filterIdx = selectedStageFilter;
           const isSingleStageView = filterIdx !== null;
           const targetMs = state.targetSeconds * 1000;
@@ -3038,9 +3288,9 @@
             const radius = barW > 8 ? 3 : 1.5;
 
             if (isSingleStageView) {
-              const stageVal = displayValues[i];
-              if (stageVal > 0) {
-                const barH = Math.max(2, (stageVal / maxScaleMs) * plotH);
+              const st = lap.stages && lap.stages[filterIdx];
+              if (st) {
+                const barH = Math.max(2, (st.durationMs / maxScaleMs) * plotH);
                 const y = padTop + plotH - barH;
                 const color = STAGE_COLORS[filterIdx % STAGE_COLORS.length];
                 barsHtml += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="${radius}" fill="${color}" opacity="0.92"></rect>`;
@@ -3442,26 +3692,32 @@
           if (
             state.mode === "stages" &&
             Array.isArray(removed.stages) &&
-            removed.stages.length >= 2
+            removed.stages.length >= 2 &&
+            removed.stages.length <= state.stageNames.length
           ) {
             const lastStage = removed.stages[removed.stages.length - 1];
             state.currentCycleStages = removed.stages.slice(0, -1);
-            state.currentStageIndex = Math.min(
-              state.stageNames.length - 1,
-              state.currentCycleStages.length,
-            );
+            state.currentStageIndex = state.currentCycleStages.length;
             if (state.status === "running" || state.status === "paused") {
               state.currentLapAccumulatedMs += lastStage.durationMs;
             }
-          } else {
-            if (state.mode === "stages") {
-              state.currentCycleStages = [];
-              state.currentStageIndex = 0;
-            }
-            // Przywracamy czas cofniętej pozycji do bieżącego okrążenia, jeśli sesja jest aktywna
-            if (state.status === "running" || state.status === "paused") {
-              state.currentLapAccumulatedMs += removed.durationMs;
-            }
+            lockoutUntil = 0;
+            saveState();
+            renderAllStatic();
+            updateLiveDisplay(nowTs);
+            showToast(
+              `Cofnięto do etapu "${lastStage.name}" z pozycji #${state.laps.length + 1} (${formatLapMs(lastStage.durationMs)})`,
+            );
+            return;
+          }
+
+          if (state.mode === "stages") {
+            state.currentCycleStages = [];
+            state.currentStageIndex = 0;
+          }
+          // Przywracamy czas cofniętej pozycji do bieżącego okrążenia, jeśli sesja jest aktywna
+          if (state.status === "running" || state.status === "paused") {
+            state.currentLapAccumulatedMs += removed.durationMs;
           }
 
           lockoutUntil = 0;
@@ -3800,6 +4056,7 @@
           const val = input.value.trim();
           state.stageNames[idx] = val ? val.slice(0, 28) : `Etap ${idx + 1}`;
           saveState();
+          renderStageBanner();
           updateLiveDisplay(Date.now());
           syncGoalInputs("all");
         });
@@ -3814,6 +4071,10 @@
         }, true);
 
         els.stageEditorList.addEventListener("click", (e) => {
+          const isCycleActive =
+            state.status !== "idle" || state.currentCycleStages.length > 0;
+          if (isCycleActive) return;
+
           const upBtn = e.target.closest("[data-stage-up]");
           if (upBtn) {
             const idx = parseInt(upBtn.getAttribute("data-stage-up"), 10);
@@ -3878,17 +4139,27 @@
           renderSvgChart(computeStageStats());
         });
 
-        els.goalToggleBtn.addEventListener("click", () => {
-          const isOpen = els.goalPanel.classList.toggle("open");
-          els.goalToggleBtn.classList.toggle("active", isOpen);
-          els.goalToggleBtn.setAttribute("aria-expanded", String(isOpen));
-        });
-
-        els.goalCloseBtn.addEventListener("click", () => {
+        function closeGoalPanel() {
+          if (!els.goalPanel.classList.contains("open")) return;
+          commitTimeGoal();
+          syncGoalInputs("all");
+          renderAllStatic();
           els.goalPanel.classList.remove("open");
           els.goalToggleBtn.classList.remove("active");
           els.goalToggleBtn.setAttribute("aria-expanded", "false");
+        }
+
+        els.goalToggleBtn.addEventListener("click", () => {
+          if (els.goalPanel.classList.contains("open")) {
+            closeGoalPanel();
+          } else {
+            els.goalPanel.classList.add("open");
+            els.goalToggleBtn.classList.add("active");
+            els.goalToggleBtn.setAttribute("aria-expanded", "true");
+          }
         });
+
+        els.goalCloseBtn.addEventListener("click", closeGoalPanel);
 
         els.targetMin.addEventListener("input", onTimeGoalChange);
         els.targetSec.addEventListener("input", onTimeGoalChange);
@@ -4010,9 +4281,7 @@
               return;
             }
             if (els.goalPanel.classList.contains("open")) {
-              els.goalPanel.classList.remove("open");
-              els.goalToggleBtn.classList.remove("active");
-              els.goalToggleBtn.setAttribute("aria-expanded", "false");
+              closeGoalPanel();
             }
             return;
           }
@@ -4038,7 +4307,7 @@
         window.addEventListener("resize", () => {
           if (chartResizeTimer) clearTimeout(chartResizeTimer);
           chartResizeTimer = setTimeout(() => {
-            if (state.laps.length > 0) renderSvgChart();
+            if (state.laps.length > 0) renderSvgChart(computeStageStats());
           }, 120);
         });
 
